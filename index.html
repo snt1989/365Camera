@@ -17,31 +17,31 @@
 html, body { margin: 0; }
 [hidden] { display: none !important; }
 /* Layout: viewfinder-style stage (WebGL viewer) beside a dome dial that tracks which shots are done.
-Deliberately a single dark look: a camera screen. Accent = viewfinder yellow, done = cool cyan. */
+   Deliberately a single dark look: a camera screen. Accent = viewfinder yellow, done = cool cyan. */
 :root {
-color-scheme: dark;
---bg: #0d1115;
---panel: #151b21;
---panel2: #1b232b;
---line: #2a343e;
---fg: #e7edf1;
---muted: #8e9ba6;
---accent: #f2c14e;
---accent-ink: #1a1405;
---done: #6cc3e0;
---danger: #ff9a8a;
---font: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
---mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+  --bg: #0d1115;
+  --panel: #151b21;
+  --panel2: #1b232b;
+  --line: #2a343e;
+  --fg: #e7edf1;
+  --muted: #8e9ba6;
+  --accent: #f2c14e;
+  --accent-ink: #1a1405;
+  --done: #6cc3e0;
+  --danger: #ff9a8a;
+  --font: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 * { box-sizing: border-box; }
 body {
-background: var(--bg);
-color: var(--fg);
-font: 400 14px/1.6 var(--font);
-padding-top: max(16px, env(safe-area-inset-top, 0px));
-padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
-padding-left: max(16px, env(safe-area-inset-left, 0px));
-padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 14px/1.6 var(--font);
+  padding-top: max(16px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 .app { max-width: 1180px; margin: 0 auto; display: grid; gap: 14px; }
 .head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -49,15 +49,16 @@ h1 { font: 700 20px/1.2 var(--font); margin: 0; letter-spacing: .02em; }
 .chip { font: 500 11px var(--mono); border: 1px solid var(--line); color: var(--muted); padding: 3px 9px; border-radius: 99px; }
 .layout { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; } }
+
 .stage { position: relative; height: clamp(280px, 56vw, 620px); background: #000; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .stage.drop { outline: 2px dashed var(--accent); outline-offset: -6px; }
 #view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; outline: none; }
 #view:active { cursor: grabbing; }
 #view:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .stage::after {
-content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%);
-background: linear-gradient(var(--accent), var(--accent)) center / 1px 100% no-repeat, linear-gradient(var(--accent), var(--accent)) center / 100% 1px no-repeat;
-opacity: .65; pointer-events: none;
+  content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%);
+  background: linear-gradient(var(--accent), var(--accent)) center / 1px 100% no-repeat, linear-gradient(var(--accent), var(--accent)) center / 100% 1px no-repeat;
+  opacity: .65; pointer-events: none;
 }
 .brackets i { position: absolute; width: 20px; height: 20px; border: 2px solid rgba(242, 193, 78, .85); pointer-events: none; }
 .brackets i:nth-child(1) { left: 12px; top: 12px; border-right: 0; border-bottom: 0; }
@@ -66,13 +67,15 @@ opacity: .65; pointer-events: none;
 .brackets i:nth-child(4) { right: 12px; bottom: 44px; border-left: 0; border-top: 0; }
 .hud { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 6px 18px; flex-wrap: wrap; padding: 22px 14px 9px; font: 500 12px var(--mono); color: var(--fg); background: linear-gradient(transparent, rgba(0, 0, 0, .7)); pointer-events: none; }
 .hud b { color: var(--accent); font-weight: 500; }
+
 .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
 .spacer { flex: 1; }
 .msg { min-height: 1.6em; margin: 8px 0 0; color: var(--muted); font-size: 13px; }
 .msg.err { color: var(--danger); }
+
 button, select {
-font: 500 13px var(--font); color: var(--fg); background: var(--panel2); border: 1px solid var(--line);
-padding: 8px 14px; border-radius: 6px; min-height: 40px; cursor: pointer;
+  font: 500 13px var(--font); color: var(--fg); background: var(--panel2); border: 1px solid var(--line);
+  padding: 8px 14px; border-radius: 6px; min-height: 40px; cursor: pointer;
 }
 button:hover:not(:disabled) { border-color: #4a5a68; }
 button:focus-visible, select:focus-visible, input[type=range]:focus-visible, .dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -83,6 +86,7 @@ button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent);
 .seg button { border: 0; border-radius: 0; background: transparent; }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button.on { background: rgba(242, 193, 78, .14); color: var(--accent); }
+
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 14px; min-width: 0; }
 .panel h2 { margin: 0; font: 700 16px var(--font); }
 .panel p { margin: 0; color: var(--muted); font-size: 13px; }
@@ -109,6 +113,7 @@ button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent);
 .progress { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; }
 #progBar { height: 100%; width: 0; background: var(--accent); }
 .ptxt { font: 500 12px var(--mono); color: var(--muted); }
+
 .live { position: fixed; inset: 0; z-index: 50; background: #000; overflow: hidden; }
 .live video, .live canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .live video { object-fit: cover; }
@@ -125,853 +130,1367 @@ button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent);
 .flash.go { animation: fl .25s ease-out; }
 @keyframes fl { from { opacity: .75; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .flash.go { animation: none; } }
+.sub { margin: -6px 0 0; color: var(--muted); font-size: 13px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.steps li { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-weight: 500; font-size: 13px; }
+.steps li b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1px solid currentColor; font: 700 11px var(--mono); }
+.steps li.cur { color: var(--accent); border-color: var(--accent); background: rgba(242, 193, 78, .1); }
+.steps li.done { color: var(--done); }
+.panel p.lead { color: var(--fg); line-height: 1.7; }
+.panel p.lead b { color: var(--accent); font-weight: 700; }
+.panel p.hint { font-size: 12px; margin-top: -6px; }
+details.how, details.adv { border: 1px solid var(--line); border-radius: 6px; padding: 0 12px; background: var(--panel2); }
+details summary { cursor: pointer; padding: 10px 0; font-weight: 600; font-size: 13px; }
+details[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+details.how ul { margin: 0 0 10px; padding-left: 18px; display: grid; gap: 5px; font-size: 13px; }
+details.how li b { color: var(--accent); }
+details.adv .field { padding-bottom: 12px; }
+.group { display: grid; gap: 8px; }
+.glabel { font-weight: 600; font-size: 13px; }
+.note { font-size: 12px; color: var(--muted); grid-column: 1 / -1; }
+.check { display: flex; gap: 8px; align-items: center; grid-column: 1 / -1; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+button.big { min-height: 52px; font-size: 15px; width: 100%; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions > button:not(.big) { flex: 1 1 140px; }
+.legend { display: block; margin-top: 4px; font-size: 11px; }
+.lg { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 3px; border: 2px solid var(--accent); }
+.lg.d { background: var(--done); border-color: var(--done); }
+.report { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--done); border-radius: 6px; background: rgba(108, 195, 224, .08); font-size: 13px; }
+.report b { color: var(--done); }
+.ltxt { min-width: 0; flex: 1; }
+.lp { height: 4px; background: rgba(255, 255, 255, .25); border-radius: 2px; margin: 6px 0; overflow: hidden; max-width: 260px; }
+.lp i { display: block; height: 100%; width: 0; background: var(--accent); }
+.ltip { font-size: 12px; line-height: 1.5; color: #e1e8ed; max-width: 340px; }
+.lmid { position: absolute; left: 0; right: 0; bottom: 130px; text-align: center; font: 800 26px/1.3 var(--font); color: #fff; text-shadow: 0 1px 6px #000, 0 0 2px #000; padding: 0 16px; pointer-events: none; }
 </style>
 </head>
 <body>
+
 <div class="app">
-<header class="head">
-<h1>全天球カメラ</h1>
-<span class="chip" id="srcChip">サンプル</span>
-<span class="spacer"></span>
-<button type="button" id="btnInstall" hidden>アプリをインストール</button>
-<span class="chip" id="iosHint" hidden>共有 → ホーム画面に追加</span>
-</header>
-<div class="layout">
-<section>
-<div class="stage" id="stage">
-<canvas id="view" tabindex="0" aria-label="360度ビューア。ドラッグまたは矢印キーで見回せます"></canvas>
-<div class="brackets" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-<div class="hud" aria-hidden="true">
-<span>方位 <b id="vYaw">000°</b></span>
-<span>仰角 <b id="vPitch">+00°</b></span>
-<span><span id="lFov">視野</span> <b id="vFov">90°</b></span>
+  <header class="head">
+    <h1>全天球カメラ</h1>
+    <span class="chip" id="srcChip">サンプル</span>
+    <span class="spacer"></span>
+    <button type="button" id="btnInstall" hidden>アプリをインストール</button>
+    <span class="chip" id="iosHint" hidden>共有 → ホーム画面に追加</span>
+  </header>
+  <p class="sub">スマホのカメラで周囲をぐるっと撮ると、1枚の360°写真(全天球写真)になります。</p>
+
+  <div class="layout">
+    <section>
+      <div class="stage" id="stage">
+        <canvas id="view" tabindex="0" aria-label="360度ビューア。ドラッグまたは矢印キーで見回せます"></canvas>
+        <div class="brackets" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="hud" aria-hidden="true">
+          <span>方位 <b id="vYaw">000°</b></span>
+          <span>仰角 <b id="vPitch">+00°</b></span>
+          <span><span id="lFov">視野</span> <b id="vFov">90°</b></span>
+        </div>
+      </div>
+      <div class="bar">
+        <div class="seg" role="group" aria-label="表示方式">
+          <button type="button" class="on" data-mode="rect">通常</button>
+          <button type="button" data-mode="planet">リトルプラネット</button>
+        </div>
+        <button type="button" id="btnSpin" aria-pressed="false">自動回転</button>
+        <button type="button" id="btnReset">向きをリセット</button>
+        <span class="spacer"></span>
+        <button type="button" id="btnOpen">360°画像を開く</button>
+        <button type="button" id="btnSave" class="primary" hidden disabled>JPEGで保存</button>
+      </div>
+      <p class="msg" id="msg" role="status" aria-live="polite">いまはサンプル画像を表示しています。ドラッグで見回し、ホイールやピンチで拡大縮小できます。右の「撮影して全天球にする」から、自分の写真を作れます。</p>
+    </section>
+
+    <section class="panel" id="capture">
+      <h2>撮影して全天球にする</h2>
+      <ol class="steps" aria-label="作業の流れ">
+        <li id="st1" class="cur"><b>1</b>撮る</li>
+        <li id="st2"><b>2</b>つなぐ</li>
+        <li id="st3"><b>3</b>保存する</li>
+      </ol>
+      <p class="lead">その場に立ったまま、画面の案内に従ってスマホを向けるだけです。向きをジャイロで検出し、ぴたっと止まると<b>自動でシャッター</b>が切れます。つなぎ合わせる時に、位置のずれと明るさの差も<b>自動で補正</b>します。</p>
+
+      <details class="how">
+        <summary>きれいに撮るコツ</summary>
+        <ul>
+          <li><b>足は動かさず</b>、体ごとその場で回ります。腕だけ動かすとつなぎ目がずれます。</li>
+          <li>スマホは<b>縦向き</b>で、胸の前でまっすぐ持ちます。</li>
+          <li>黄色い輪に画面中央の丸を重ねて、<b>1秒ほど止める</b>と自動で撮れます。</li>
+          <li>人や車が動いている場所は、素早く撮ると写り込みが減ります。</li>
+          <li>最初に「カメラ」と「モーションセンサー」の許可を求められます。どちらも「許可」を選んでください。</li>
+        </ul>
+      </details>
+
+      <div class="group">
+        <div class="glabel">撮る範囲</div>
+        <div class="seg" role="group" aria-label="撮る範囲" id="patSeg">
+          <button type="button" class="on" data-pat="ring">水平に1周(かんたん)</button>
+          <button type="button" data-pat="full">上下も含む(全天球)</button>
+        </div>
+        <p id="patDesc"></p>
+      </div>
+
+      <div class="dialrow">
+        <svg id="dial" viewBox="-104 -112 208 216" role="group" aria-label="撮影位置のダイヤル。中心が真上、外周が真下。円をタップすると撮る位置を選べます"></svg>
+        <div class="next">つぎに向ける場所<strong id="nextTitle"></strong><span id="nextSub"></span><span class="legend"><i class="lg a"></i>いま ・ <i class="lg d"></i>撮影済み</span></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary big" id="btnLive">カメラで自動撮影を始める</button>
+      </div>
+      <p class="hint">おすすめ。ジャイロが使えないときは、下のボタンで1枚ずつ撮れます。</p>
+      <div class="actions">
+        <button type="button" id="btnShoot">この位置を1枚撮る</button>
+        <button type="button" id="btnPick">撮影済みの写真を選ぶ</button>
+      </div>
+
+      <div class="slots" id="slots"></div>
+
+      <details class="adv">
+        <summary>詳しい設定</summary>
+        <div class="field">
+          <label for="fov">レンズの画角(写真の長い辺)</label><output id="fovOut" for="fov">65°</output>
+          <input type="range" id="fov" min="45" max="100" value="65">
+          <span class="note">目安です。自動補正をオンにすると、つなぎ合わせる時に実際の画角へ合わせます。</span><span></span>
+          <label for="res">出力サイズ</label><span></span>
+          <select id="res">
+            <option value="2048">標準 2048×1024</option>
+            <option value="4096">高精細 4096×2048(時間がかかります)</option>
+          </select>
+          <label class="check"><input type="checkbox" id="autoFix" checked> 自動補正(向き・画角・明るさ)</label><span></span>
+        </div>
+      </details>
+
+      <div class="actions">
+        <button type="button" class="primary" id="btnStitch" disabled>つなぎ合わせる</button>
+        <button type="button" id="btnClear">最初からやり直す</button>
+      </div>
+      <div class="progress" id="prog" hidden><div id="progBar"></div></div>
+      <div class="ptxt" id="progTxt" hidden></div>
+      <div class="report" id="report" hidden><b>仕上がり</b><span id="reportTxt"></span></div>
+    </section>
+  </div>
 </div>
-</div>
-<div class="bar">
-<div class="seg" role="group" aria-label="表示方式">
-<button type="button" class="on" data-mode="rect">通常</button>
-<button type="button" data-mode="planet">リトルプラネット</button>
-</div>
-<button type="button" id="btnSpin" aria-pressed="false">自動回転</button>
-<button type="button" id="btnReset">向きをリセット</button>
-<span class="spacer"></span>
-<button type="button" id="btnOpen">360°画像を開く</button>
-<button type="button" id="btnSave" class="primary" hidden disabled>JPEGで保存</button>
-</div>
-<p class="msg" id="msg" role="status" aria-live="polite">ドラッグで見回し、ホイールやピンチで拡大縮小できます。360°カメラの画像ファイルもここへドロップできます。</p>
-</section>
-<section class="panel" id="capture">
-<h2>撮影して全天球にする</h2>
-<p>「カメラで自動撮影」を押し、画面の黄色い輪に向けてスマホを動かすと、ジャイロで向きを検出して自動でシャッターが切れます。その場から動かず、体ごと回って撮るとつなぎ目がきれいです。</p>
-<div class="seg" role="group" aria-label="撮影パターン" id="patSeg">
-<button type="button" class="on" data-pat="ring">水平のみ 9枚</button>
-<button type="button" data-pat="full">全天球 23枚</button>
-</div>
-<div class="dialrow">
-<svg id="dial" viewBox="-104 -112 208 216" role="group" aria-label="撮影位置のダイヤル。中心が真上、外周が真下"></svg>
-<div class="next">次の撮影<strong id="nextTitle">#1 水平・正面</strong><span id="nextSub">0 / 9 枚</span></div>
-</div>
-<div class="actions">
-<button type="button" class="primary" id="btnLive">カメラで自動撮影</button>
-<button type="button" id="btnShoot">撮影する</button>
-<button type="button" id="btnPick">写真をまとめて選ぶ</button>
-</div>
-<div class="slots" id="slots"></div>
-<div class="field">
-<label for="fov">レンズの画角(長辺)</label><output id="fovOut" for="fov">65°</output>
-<input type="range" id="fov" min="50" max="90" value="65">
-<label for="res">出力サイズ</label><span></span>
-<select id="res">
-<option value="2048">標準 2048×1024</option>
-<option value="4096">高精細 4096×2048(時間がかかります)</option>
-</select>
-</div>
-<div class="actions">
-<button type="button" class="primary" id="btnStitch" disabled>つなぎ合わせる</button>
-<button type="button" id="btnClear">全てクリア</button>
-</div>
-<div class="progress" id="prog" hidden><div id="progBar"></div></div>
-<div class="ptxt" id="progTxt" hidden></div>
-</section>
-</div>
-</div>
+
 <div class="live" id="live" hidden role="dialog" aria-label="自動撮影">
-<video id="lv" playsinline muted autoplay></video>
-<canvas id="lc"></canvas>
-<div class="flash" id="flash"></div>
-<div class="ltop">
-<div><div class="lt" id="liveTitle"></div><div class="ls" id="liveSub"></div></div>
-<button type="button" id="liveClose">閉じる</button>
+  <video id="lv" playsinline muted autoplay></video>
+  <canvas id="lc"></canvas>
+  <div class="flash" id="flash"></div>
+  <div class="ltop">
+    <div class="ltxt"><div class="ls" id="liveSub"></div><div class="lt" id="liveTitle"></div><div class="lp"><i id="liveBar"></i></div><div class="ltip" id="liveTip"></div></div>
+    <button type="button" id="liveClose">閉じる</button>
+  </div>
+  <div class="lmid" id="liveHint" aria-live="polite"></div>
+  <div class="lbot">
+    <button type="button" id="liveRecenter">いまの向きを合わせる</button>
+    <button type="button" class="shutter" id="liveShutter" aria-label="今すぐ撮影"></button>
+    <label class="auto"><input type="checkbox" id="liveAuto" checked> 自動撮影</label>
+  </div>
 </div>
-<div class="lbot">
-<button type="button" id="liveRecenter">正面を合わせ直す</button>
-<button type="button" class="shutter" id="liveShutter" aria-label="今すぐ撮影"></button>
-<label class="auto"><input type="checkbox" id="liveAuto" checked> 自動撮影</label>
-</div>
-</div>
+
 <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
 <input type="file" id="filePick" accept="image/*" multiple hidden>
 <input type="file" id="filePano" accept="image/*" hidden>
 <script>
 (function () {
-"use strict";
-var $ = function (id) { return document.getElementById(id); };
-var D2R = Math.PI / 180;
-var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
-var msgEl = $("msg");
-function say(t, err) { msgEl.textContent = t || ""; msgEl.className = "msg" + (err ? " err" : ""); }
-var view = $("view"), stage = $("stage");
-var S = { mode: "rect", yaw: 0, pitch: 0, fov: 1.571, scale: 1.5, vYaw: 0, vPitch: 0, spin: false };
-var gl = null, glOK = false, texReady = false, maxTex = 2048;
-var uRes, uLook, uFov, uMode, tex;
-var VS = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
-var FS = [
-"#ifdef GL_FRAGMENT_PRECISION_HIGH", "precision highp float;", "#else", "precision mediump float;", "#endif",
-"uniform sampler2D tex;uniform vec2 res;uniform vec2 look;uniform float fov;uniform float mode;",
-"const float PI=3.14159265359;",
-"void main(){",
-"  vec2 ndc=(gl_FragCoord.xy-0.5*res)/(0.5*res.y);",
-"  vec3 d;float cy=cos(look.x),sy=sin(look.x);",
-"  if(mode<0.5){",
-"    float t=tan(fov*0.5);",
-"    vec3 v=normalize(vec3(ndc.x*t,ndc.y*t,-1.0));",
-"    float cp=cos(look.y),sp=sin(look.y);",
-"    v=vec3(v.x,v.y*cp-v.z*sp,v.y*sp+v.z*cp);",
-"    d=vec3(v.x*cy-v.z*sy,v.y,v.x*sy+v.z*cy);",
-"  }else{",
-"    vec2 q=ndc*fov*0.9;float r2=dot(q,q);",
-"    vec3 v=vec3(2.0*q.x,r2-1.0,-2.0*q.y)/(r2+1.0);",
-"    d=vec3(v.x*cy-v.z*sy,v.y,v.x*sy+v.z*cy);",
-"  }",
-"  float lon=atan(d.x,-d.z);float lat=asin(clamp(d.y,-1.0,1.0));",
-"  vec2 uv=vec2(lon/(2.0*PI)+0.5,0.5-lat/PI);",
-"  gl_FragColor=vec4(texture2D(tex,uv).rgb,1.0);",
-"}"
-].join("\n");
-function initGL() {
-gl = view.getContext("webgl", { antialias: false, alpha: false });
-if (!gl) throw new Error("webgl");
-function sh(type, src) {
-var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-return s;
-}
-var prog = gl.createProgram();
-gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
-gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
-gl.linkProgram(prog);
-if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link");
-gl.useProgram(prog);
-var buf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-var loc = gl.getAttribLocation(prog, "p");
-gl.enableVertexAttribArray(loc);
-gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-uRes = gl.getUniformLocation(prog, "res");
-uLook = gl.getUniformLocation(prog, "look");
-uFov = gl.getUniformLocation(prog, "fov");
-uMode = gl.getUniformLocation(prog, "mode");
-gl.uniform1i(gl.getUniformLocation(prog, "tex"), 0);
-tex = gl.createTexture();
-maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 2048;
-glOK = true;
-}
-try { initGL(); } catch (e) { say("このブラウザではWebGLが使えないため、全天球を表示できません。", true); }
-function uploadTexture(canvas) {
-if (!glOK) return;
-gl.activeTexture(gl.TEXTURE0);
-gl.bindTexture(gl.TEXTURE_2D, tex);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-texReady = true;
-}
-function pad(n, len) { var s = String(Math.abs(Math.round(n))); while (s.length < len) s = "0" + s; return s; }
-function updateHud() {
-var yawDeg = ((S.yaw / D2R) % 360 + 360) % 360;
-$("vYaw").textContent = pad(yawDeg === 360 ? 0 : yawDeg, 3) + "°";
-if (S.mode === "rect") {
-var p = S.pitch / D2R;
-$("vPitch").textContent = (p < 0 ? "−" : "+") + pad(p, 2) + "°";
-$("lFov").textContent = "視野";
-$("vFov").textContent = Math.round(S.fov / D2R) + "°";
-} else {
-$("vPitch").textContent = "−90°";
-$("lFov").textContent = "倍率";
-$("vFov").textContent = "×" + (1.5 / S.scale).toFixed(1);
-}
-}
-var raf = 0, lastT = 0, dragging = false;
-function draw() {
-if (!glOK || !texReady) return;
-var w = view.width, h = view.height;
-if (!w || !h) return;
-gl.viewport(0, 0, w, h);
-gl.uniform2f(uRes, w, h);
-gl.uniform2f(uLook, S.yaw, S.pitch);
-gl.uniform1f(uFov, S.mode === "rect" ? S.fov : S.scale);
-gl.uniform1f(uMode, S.mode === "rect" ? 0 : 1);
-gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-updateHud();
-}
-function frame(t) {
-raf = 0;
-var dt = lastT ? Math.min(0.05, (t - lastT) / 1000) : 0.016;
-lastT = t;
-var moving = false;
-if (!dragging) {
-if (Math.abs(S.vYaw) > 0.01 || Math.abs(S.vPitch) > 0.01) {
-S.yaw += S.vYaw * dt;
-S.pitch = clamp(S.pitch + S.vPitch * dt, -1.55, 1.55);
-var decay = Math.pow(0.03, dt);
-S.vYaw *= decay; S.vPitch *= decay;
-moving = true;
-} else { S.vYaw = 0; S.vPitch = 0; }
-if (S.spin) { S.yaw += 0.22 * dt; moving = true; }
-}
-draw();
-if (moving || dragging) raf = requestAnimationFrame(frame); else lastT = 0;
-}
-function requestDraw() { if (!raf) raf = requestAnimationFrame(frame); }
-function resize() {
-var dpr = Math.min(window.devicePixelRatio || 1, 2);
-var w = Math.round(view.clientWidth * dpr), h = Math.round(view.clientHeight * dpr);
-if (w && h && (view.width !== w || view.height !== h)) { view.width = w; view.height = h; }
-requestDraw();
-}
-if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); else window.addEventListener("resize", resize);
-function zoom(f) {
-if (S.mode === "rect") S.fov = clamp(S.fov * f, 0.35, 2.0);
-else S.scale = clamp(S.scale * f, 0.9, 2.6);
-requestDraw();
-}
-var ptrs = new Map(), pinch = 0, lastMove = 0;
-function pinchDist() {
-var a = Array.from(ptrs.values());
-return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) || 1;
-}
-view.addEventListener("pointerdown", function (e) {
-try { view.setPointerCapture(e.pointerId); } catch (err) {}
-ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-S.vYaw = 0; S.vPitch = 0;
-if (ptrs.size === 1) { dragging = true; lastMove = e.timeStamp; }
-else if (ptrs.size === 2) { pinch = pinchDist(); }
-requestDraw();
-});
-view.addEventListener("pointermove", function (e) {
-var p = ptrs.get(e.pointerId);
-if (!p) return;
-var ox = p.x, oy = p.y;
-p.x = e.clientX; p.y = e.clientY;
-if (ptrs.size === 1) {
-var dt = Math.max(0.008, (e.timeStamp - lastMove) / 1000);
-lastMove = e.timeStamp;
-var r = view.getBoundingClientRect();
-if (S.mode === "rect") {
-var k = S.fov / r.height;
-var dYaw = -(p.x - ox) * k, dPitch = (p.y - oy) * k;
-var np = clamp(S.pitch + dPitch, -1.55, 1.55);
-if (np !== S.pitch + dPitch) dPitch = 0;
-S.yaw += dYaw; S.pitch = np;
-S.vYaw = clamp(dYaw / dt, -6, 6); S.vPitch = clamp(dPitch / dt, -6, 6);
-} else {
-var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-var a1 = Math.atan2(ox - cx, -(oy - cy)), a2 = Math.atan2(p.x - cx, -(p.y - cy));
-var da = a2 - a1; da = Math.atan2(Math.sin(da), Math.cos(da));
-S.yaw -= da; S.vYaw = clamp(-da / dt, -6, 6);
-}
-} else if (ptrs.size === 2) {
-var nd = pinchDist();
-zoom(pinch / nd);
-pinch = nd;
-}
-requestDraw();
-});
-function endPtr(e) {
-ptrs.delete(e.pointerId);
-if (e.timeStamp - lastMove > 90) { S.vYaw = 0; S.vPitch = 0; }
-if (ptrs.size === 0) dragging = false;
-requestDraw();
-}
-view.addEventListener("pointerup", endPtr);
-view.addEventListener("pointercancel", endPtr);
-view.addEventListener("wheel", function (e) { e.preventDefault(); zoom(Math.exp(e.deltaY * 0.0012)); }, { passive: false });
-view.addEventListener("keydown", function (e) {
-var step = 0.08 * (S.mode === "rect" ? S.fov : 1), used = true;
-if (e.key === "ArrowLeft") S.yaw -= step;
-else if (e.key === "ArrowRight") S.yaw += step;
-else if (e.key === "ArrowUp" && S.mode === "rect") S.pitch = clamp(S.pitch + step, -1.55, 1.55);
-else if (e.key === "ArrowDown" && S.mode === "rect") S.pitch = clamp(S.pitch - step, -1.55, 1.55);
-else if (e.key === "+" || e.key === "=") zoom(0.9);
-else if (e.key === "-") zoom(1.1);
-else used = false;
-if (used) { e.preventDefault(); requestDraw(); }
-});
-document.querySelectorAll("[data-mode]").forEach(function (b) {
-b.addEventListener("click", function () {
-S.mode = b.getAttribute("data-mode");
-document.querySelectorAll("[data-mode]").forEach(function (x) { x.classList.toggle("on", x === b); });
-requestDraw();
-});
-});
-$("btnSpin").addEventListener("click", function () {
-S.spin = !S.spin; this.setAttribute("aria-pressed", String(S.spin)); requestDraw();
-});
-$("btnReset").addEventListener("click", function () {
-S.yaw = 0; S.pitch = 0; S.fov = 1.571; S.scale = 1.5; S.vYaw = 0; S.vPitch = 0; requestDraw();
-});
-var pano = null, panoLabel = "";
-var dlApi = null;
-function usePano(canvas, label) {
-pano = canvas; panoLabel = label;
-uploadTexture(canvas);
-$("srcChip").textContent = label;
-$("btnSave").disabled = !dlApi || label === "サンプル";
-requestDraw();
-}
-function makeEquirect(src, sw, sh) {
-var W = (sw >= 3000 && maxTex >= 4096) ? 4096 : 2048, H = W / 2;
-var c = document.createElement("canvas"); c.width = W; c.height = H;
-var g = c.getContext("2d");
-if (Math.abs(sw / sh - 2) < 0.08) {
-g.drawImage(src, 0, 0, W, H);
-return { canvas: c, exact: true };
-}
-var gr = g.createLinearGradient(0, 0, 0, H);
-gr.addColorStop(0, "#1c2a38"); gr.addColorStop(0.5, "#2a3138"); gr.addColorStop(0.5, "#1a1613"); gr.addColorStop(1, "#0e0c0a");
-g.fillStyle = gr; g.fillRect(0, 0, W, H);
-var dh = W * sh / sw;
-g.drawImage(src, 0, (H - dh) / 2, W, dh);
-return { canvas: c, exact: false };
-}
-function loadImage(file) {
-return new Promise(function (resolve, reject) {
-var url = URL.createObjectURL(file), img = new Image();
-img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
-img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("decode")); };
-img.src = url;
-});
-}
-async function openPano(file) {
-if (!file) return;
-try {
-var img = await loadImage(file);
-var r = makeEquirect(img, img.naturalWidth, img.naturalHeight);
-usePano(r.canvas, file.name.length > 28 ? file.name.slice(0, 25) + "…" : file.name);
-S.yaw = 0; S.pitch = 0;
-say(r.exact ? "画像を読み込みました。" : "縦横比が2:1ではないため、横幅いっぱいを360°として中央に配置しました。", false);
-} catch (e) { say("画像を読み込めませんでした。JPEGまたはPNGを選んでください。", true); }
-}
-$("btnOpen").addEventListener("click", function () { $("filePano").click(); });
-$("filePano").addEventListener("change", function (e) { var f = e.target.files[0]; e.target.value = ""; openPano(f); });
-["dragover", "dragenter"].forEach(function (n) {
-stage.addEventListener(n, function (e) { e.preventDefault(); stage.classList.add("drop"); });
-});
-["dragleave", "drop"].forEach(function (n) {
-stage.addEventListener(n, function (e) { e.preventDefault(); stage.classList.remove("drop"); });
-});
-stage.addEventListener("drop", function (e) {
-var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-if (f && /^image\//.test(f.type)) openPano(f);
-});
-function addGPano(buf, W, H) {
-var u8 = new Uint8Array(buf);
-var xml = '<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>' +
-'<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
-'<rdf:Description rdf:about="" xmlns:GPano="http://ns.google.com/photos/1.0/panorama/" ' +
-'GPano:ProjectionType="equirectangular" GPano:UsePanoramaViewer="True" ' +
-'GPano:FullPanoWidthPixels="' + W + '" GPano:FullPanoHeightPixels="' + H + '" ' +
-'GPano:CroppedAreaImageWidthPixels="' + W + '" GPano:CroppedAreaImageHeightPixels="' + H + '" ' +
-'GPano:CroppedAreaLeftPixels="0" GPano:CroppedAreaTopPixels="0" GPano:PoseHeadingDegrees="0"/>' +
-'</rdf:RDF></x:xmpmeta><?xpacket end="w"?>';
-var head = new TextEncoder().encode("http://ns.adobe.com/xap/1.0/\0");
-var body = new TextEncoder().encode(xml);
-var len = 2 + head.length + body.length;
-var seg = new Uint8Array(2 + len);
-seg[0] = 0xFF; seg[1] = 0xE1; seg[2] = len >> 8; seg[3] = len & 255;
-seg.set(head, 4); seg.set(body, 4 + head.length);
-var pos = 2;
-if (u8[2] === 0xFF && u8[3] === 0xE0) pos = 4 + ((u8[4] << 8) | u8[5]);
-var out = new Uint8Array(u8.length + seg.length);
-out.set(u8.subarray(0, pos), 0); out.set(seg, pos); out.set(u8.subarray(pos), pos + seg.length);
-return out;
-}
-$("btnSave").addEventListener("click", function () {
-if (!pano || !dlApi) return;
-var W = pano.width, H = pano.height;
-pano.toBlob(async function (blob) {
-if (!blob) { say("JPEGを作成できませんでした。", true); return; }
-try {
-var data = addGPano(await blob.arrayBuffer(), W, H);
-var d = new Date(), p2 = function (n) { return (n < 10 ? "0" : "") + n; };
-var name = "sphere-" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + "-" + p2(d.getHours()) + p2(d.getMinutes()) + ".jpg";
-await dlApi.save({ filename: name, data: new Blob([data], { type: "image/jpeg" }) });
-say("保存しました。Googleフォトなどで360°写真として開けます。", false);
-} catch (err) {
-if (err && err.code === "declined") return;
-say("この画面では保存できませんでした。", true);
-}
-}, "image/jpeg", 0.92);
-});
-dlApi = {
-save: async function (o) {
-var file = new File([o.data], o.filename, { type: "image/jpeg" });
-if (navigator.canShare && navigator.canShare({ files: [file] })) {
-try { await navigator.share({ files: [file], title: "全天球カメラ" }); return; }
-catch (e) { if (e && e.name === "AbortError") throw { code: "declined" }; }
-}
-var url = URL.createObjectURL(file), a = document.createElement("a");
-a.href = url; a.download = o.filename; document.body.appendChild(a); a.click(); a.remove();
-setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-}
-};
-$("btnSave").hidden = false; $("btnSave").disabled = !pano || panoLabel === "サンプル";
-function drawSample() {
-var W = 2048, H = 1024, c = document.createElement("canvas");
-c.width = W; c.height = H;
-var g = c.getContext("2d");
-var gr = g.createLinearGradient(0, 0, 0, H / 2);
-gr.addColorStop(0, "#0a1320"); gr.addColorStop(0.55, "#27506b"); gr.addColorStop(0.86, "#c98f6a"); gr.addColorStop(1, "#f0c27f");
-g.fillStyle = gr; g.fillRect(0, 0, W, H / 2);
-var sx = (20 + 180) / 360 * W, sy = H / 2 - H * 8 / 180;
-gr = g.createRadialGradient(sx, sy, 0, sx, sy, 180);
-gr.addColorStop(0, "rgba(255,238,196,.95)"); gr.addColorStop(0.12, "rgba(255,214,150,.55)"); gr.addColorStop(1, "rgba(255,190,120,0)");
-g.fillStyle = gr; g.fillRect(0, 0, W, H / 2);
-function ridge(amp, col, ph, ks) {
-g.beginPath(); g.moveTo(0, H / 2);
-for (var x = 0; x <= W; x += 4) {
-var a = 0;
-for (var i = 0; i < ks.length; i++) a += Math.sin(2 * Math.PI * ks[i] * x / W + ph * (i + 1)) / (i + 1);
-g.lineTo(x, H / 2 - amp * (0.5 + 0.5 * a / 1.83));
-}
-g.lineTo(W, H / 2); g.closePath(); g.fillStyle = col; g.fill();
-}
-ridge(46, "#1a2a38", 1.3, [3, 7, 13]);
-ridge(30, "#0f1b25", 0.4, [5, 11, 19]);
-gr = g.createLinearGradient(0, H / 2, 0, H);
-gr.addColorStop(0, "#1f1b17"); gr.addColorStop(1, "#090807");
-g.fillStyle = gr; g.fillRect(0, H / 2, W, H / 2);
-g.lineWidth = 1; g.strokeStyle = "rgba(255,255,255,.13)";
-var i2, x2, y2;
-for (i2 = 0; i2 < 12; i2++) { x2 = i2 / 12 * W; g.beginPath(); g.moveTo(x2, 0); g.lineTo(x2, H); g.stroke(); }
-for (i2 = -75; i2 <= 75; i2 += 15) {
-if (i2 === 0) continue;
-y2 = H / 2 - i2 / 180 * H; g.beginPath(); g.moveTo(0, y2); g.lineTo(W, y2); g.stroke();
-}
-g.lineWidth = 2; g.strokeStyle = "rgba(242,193,78,.6)";
-g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
-g.textAlign = "center"; g.fillStyle = "rgba(255,255,255,.72)";
-g.font = '500 22px ui-monospace, Menlo, monospace';
-for (var deg = 0; deg < 360; deg += 30) {
-var th = deg > 180 ? deg - 360 : deg, xx = (th / 360 + 0.5) * W;
-g.fillText(deg + "°", xx, H / 2 + 32);
-if (deg === 180) g.fillText(deg + "°", 0, H / 2 + 32);
-}
-for (var la = -60; la <= 60; la += 30) {
-if (la === 0) continue;
-g.fillText((la > 0 ? "+" : "−") + Math.abs(la) + "°", W / 2 + 54, H / 2 - la / 180 * H + 8);
-}
-var card = [["N", "北", W / 2], ["E", "東", W * 0.75], ["S", "南", 0], ["S", "南", W], ["W", "西", W * 0.25]];
-card.forEach(function (k) {
-g.fillStyle = "#f2c14e"; g.font = '700 84px system-ui, "Hiragino Sans", sans-serif';
-g.fillText(k[0], k[2], H / 2 - 92);
-g.fillStyle = "rgba(255,255,255,.8)"; g.font = '500 32px system-ui, "Hiragino Sans", sans-serif';
-g.fillText(k[1], k[2], H / 2 - 52);
-});
-return c;
-}
-var targets = [], shots = [], active = 0, pattern = "ring", busy = false, pendingIndex = 0;
-function makePattern(kind) {
-var t = [];
-function ring(pitch, n) { for (var i = 0; i < n; i++) t.push({ yaw: i * 360 / n, pitch: pitch }); }
-ring(0, 9);
-if (kind === "full") { ring(50, 6); ring(-50, 6); t.push({ yaw: 0, pitch: 90 }); t.push({ yaw: 0, pitch: -90 }); }
-return t;
-}
-function labelOf(t) {
-if (t.pitch === 90) return "真上";
-if (t.pitch === -90) return "真下";
-var p = t.pitch === 0 ? "水平" : (t.pitch > 0 ? "上" : "下") + Math.abs(t.pitch) + "°";
-var y = t.yaw === 0 ? "正面" : (t.yaw > 180 ? "左" + (360 - t.yaw) : "右" + t.yaw) + "°";
-return p + "・" + y;
-}
-function count() { var n = 0; shots.forEach(function (s) { if (s) n++; }); return n; }
-function nextEmpty(from) {
-var n = targets.length;
-for (var k = 0; k < n; k++) { var i = (from + k) % n; if (!shots[i]) return i; }
-return from % n;
-}
-function renderCapture() {
-var s = '<circle class="ring" r="92"/><circle class="ring" r="69"/><circle class="ring h" r="46"/><circle class="ring" r="23"/>' +
-'<text class="lbl" x="0" y="-101" text-anchor="middle">正面</text>';
-targets.forEach(function (t, i) {
-var r = (90 - t.pitch) / 180 * 92, a = t.yaw * D2R;
-s += '<circle class="dot' + (shots[i] ? " done" : "") + (i === active ? " active" : "") + '" data-i="' + i +
-'" cx="' + (r * Math.sin(a)).toFixed(1) + '" cy="' + (-r * Math.cos(a)).toFixed(1) + '" r="6" tabindex="0" role="button" aria-label="#' + (i + 1) + " " + labelOf(t) + '"/>';
-});
-$("dial").innerHTML = s;
-$("slots").innerHTML = targets.map(function (t, i) {
-return '<button type="button" class="slot' + (i === active ? " active" : "") + '" data-i="' + i + '" aria-label="#' + (i + 1) + " " + labelOf(t) + '"><span>' + (i + 1) + "</span>" +
-(shots[i] ? '<img alt="" src="' + shots[i].thumb + '">' : "") + "</button>";
-}).join("");
-var n = count();
-$("nextTitle").textContent = "#" + (active + 1) + " " + labelOf(targets[active]);
-$("nextSub").textContent = n + " / " + targets.length + " 枚";
-$("btnShoot").textContent = shots[active] ? "撮り直す" : "撮影する";
-$("btnStitch").disabled = busy || n < 2;
-$("btnShoot").disabled = busy; $("btnLive").disabled = busy; $("btnPick").disabled = busy; $("btnClear").disabled = busy;
-}
-function selectSlot(i) { active = i; renderCapture(); }
-$("dial").addEventListener("click", function (e) { var d = e.target.closest("[data-i]"); if (d) selectSlot(+d.getAttribute("data-i")); });
-$("dial").addEventListener("keydown", function (e) {
-if (e.key !== "Enter" && e.key !== " ") return;
-var d = e.target.closest("[data-i]"); if (d) { e.preventDefault(); selectSlot(+d.getAttribute("data-i")); }
-});
-$("slots").addEventListener("click", function (e) { var d = e.target.closest("[data-i]"); if (d) selectSlot(+d.getAttribute("data-i")); });
-function setPattern(kind) {
-var nt = makePattern(kind), dropped = 0;
-for (var i = nt.length; i < shots.length; i++) if (shots[i]) dropped++;
-pattern = kind; targets = nt; shots.length = nt.length;
-for (var j = 0; j < nt.length; j++) if (shots[j] === undefined) shots[j] = null;
-active = clamp(active, 0, nt.length - 1);
-document.querySelectorAll("[data-pat]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-pat") === kind); });
-renderCapture();
-if (dropped) say("パターンを切り替えたため、上下の写真 " + dropped + " 枚を破棄しました。", false);
-}
-document.querySelectorAll("[data-pat]").forEach(function (b) {
-b.addEventListener("click", function () { if (!busy) setPattern(b.getAttribute("data-pat")); });
-});
-async function fileToShot(file) {
-var img = await loadImage(file);
-var w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, 1280 / Math.max(w, h));
-var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
-c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-return shotFromCanvas(c, null);
-}
-function shotFromCanvas(c, basisObj) {
-var tk = 120 / Math.max(c.width, c.height), t = document.createElement("canvas");
-t.width = Math.max(1, Math.round(c.width * tk)); t.height = Math.max(1, Math.round(c.height * tk));
-t.getContext("2d").drawImage(c, 0, 0, t.width, t.height);
-return { canvas: c, thumb: t.toDataURL("image/jpeg", 0.65), basis: basisObj };
-}
-$("btnShoot").addEventListener("click", function () { pendingIndex = active; $("fileCam").click(); });
-$("fileCam").addEventListener("change", async function (e) {
-var f = e.target.files[0]; e.target.value = "";
-if (!f) return;
-try {
-shots[pendingIndex] = await fileToShot(f);
-active = nextEmpty(pendingIndex + 1);
-renderCapture();
-var n = count();
-say(n === targets.length ? "全ての位置を撮影しました。「つなぎ合わせる」を押してください。" : "次は " + labelOf(targets[active]) + " を撮影します。", false);
-} catch (err) { say("写真を読み込めませんでした。", true); }
-});
-$("btnPick").addEventListener("click", function () { $("filePick").click(); });
-$("filePick").addEventListener("change", async function (e) {
-var files = Array.from(e.target.files); e.target.value = "";
-if (!files.length) return;
-files.sort(function (a, b) { return (a.lastModified - b.lastModified) || (a.name < b.name ? -1 : 1); });
-var idx = nextEmpty(0), used = 0;
-try {
-for (var i = 0; i < files.length && idx < targets.length; i++) {
-shots[idx] = await fileToShot(files[i]); used++;
-idx++;
-}
-active = nextEmpty(0);
-renderCapture();
-say(used + " 枚を撮影順に割り当てました。" + (files.length > used ? " 位置の数を超えた " + (files.length - used) + " 枚は使っていません。" : ""), false);
-} catch (err) { renderCapture(); say("写真を読み込めませんでした。", true); }
-});
-var clearTimer = 0;
-$("btnClear").addEventListener("click", function () {
-var b = this;
-if (!clearTimer) {
-b.textContent = "もう一度押すと全て消えます";
-clearTimer = setTimeout(function () { clearTimer = 0; b.textContent = "全てクリア"; }, 3000);
-return;
-}
-clearTimeout(clearTimer); clearTimer = 0; b.textContent = "全てクリア";
-shots = targets.map(function () { return null; }); active = 0; renderCapture();
-say("撮影した写真をクリアしました。", false);
-});
-$("fov").addEventListener("input", function () { $("fovOut").textContent = this.value + "°"; });
-function basis(yaw, pitch) {
-var cp = Math.cos(pitch), sp = Math.sin(pitch), cy = Math.cos(yaw), sy = Math.sin(yaw);
-var f = [cp * sy, cp * cy, sp], r = [cy, -sy, 0];
-var u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
-return { f: f, r: r, u: u };
-}
-function tick() { return new Promise(function (res) { setTimeout(res, 0); }); }
-async function stitch() {
-var idx = [];
-shots.forEach(function (s, i) { if (s) idx.push(i); });
-if (idx.length < 2 || busy) return;
-busy = true; renderCapture();
-var W = Math.min(+$("res").value, Math.max(2048, maxTex)), H = W / 2;
-var K = idx.length, fovLong = +$("fov").value * D2R;
-var DATA = [], CW = new Float64Array(K), CH = new Float64Array(K), CF = new Float64Array(K), CL = new Float64Array(K);
-var FX = new Float64Array(K), FY = new Float64Array(K), FZ = new Float64Array(K);
-var RX = new Float64Array(K), RY = new Float64Array(K), RZ = new Float64Array(K);
-var UX = new Float64Array(K), UY = new Float64Array(K), UZ = new Float64Array(K);
-idx.forEach(function (si, k) {
-var cv = shots[si].canvas, w = cv.width, h = cv.height;
-DATA.push(cv.getContext("2d").getImageData(0, 0, w, h).data);
-var f = (Math.max(w, h) / 2) / Math.tan(fovLong / 2);
-var b = shots[si].basis || basis(targets[si].yaw * D2R, targets[si].pitch * D2R);
-CW[k] = w; CH[k] = h; CF[k] = f;
-CL[k] = Math.cos(Math.min(Math.atan(Math.hypot(w, h) / 2 / f), 1.5));
-FX[k] = b.f[0]; FY[k] = b.f[1]; FZ[k] = b.f[2];
-RX[k] = b.r[0]; RY[k] = b.r[1]; RZ[k] = b.r[2];
-UX[k] = b.u[0]; UY[k] = b.u[1]; UZ[k] = b.u[2];
-});
-var sinT = new Float64Array(W), cosT = new Float64Array(W);
-for (var x0 = 0; x0 < W; x0++) { var th = ((x0 + 0.5) / W - 0.5) * 2 * Math.PI; sinT[x0] = Math.sin(th); cosT[x0] = Math.cos(th); }
-var out = new Uint8ClampedArray(W * H * 4), mask = new Uint8Array(W * H);
-var rowSum = new Float64Array(H * 3), rowCnt = new Uint32Array(H);
-$("prog").hidden = false; $("progTxt").hidden = false;
-var t0 = performance.now();
-for (var y = 0; y < H; y++) {
-var phi = (0.5 - (y + 0.5) / H) * Math.PI, sp = Math.sin(phi), cph = Math.cos(phi);
-var s0 = 0, s1 = 0, s2 = 0, rc = 0;
-for (var x = 0; x < W; x++) {
-var dx = cph * sinT[x], dy = cph * cosT[x], dz = sp;
-var wr = 0, wg = 0, wb = 0, ws = 0;
-for (var k = 0; k < K; k++) {
-var z = dx * FX[k] + dy * FY[k] + dz * FZ[k];
-if (z < CL[k]) continue;
-var w = CW[k], h = CH[k];
-var ix = w * 0.5 + CF[k] * (dx * RX[k] + dy * RY[k] + dz * RZ[k]) / z;
-var iy = h * 0.5 - CF[k] * (dx * UX[k] + dy * UY[k] + dz * UZ[k]) / z;
-if (ix < 0 || iy < 0 || ix >= w - 1 || iy >= h - 1) continue;
-var q = Math.min(Math.min(ix, w - 1 - ix) / (w * 0.5), Math.min(iy, h - 1 - iy) / (h * 0.5)) * 2.5;
-if (q > 1) q = 1;
-var wt = q * q * (3 - 2 * q) + 0.001;
-var px = ix | 0, py = iy | 0, fx = ix - px, fy = iy - py, dat = DATA[k];
-var o = (py * w + px) * 4, o2 = o + w * 4;
-var a00 = (1 - fx) * (1 - fy), a10 = fx * (1 - fy), a01 = (1 - fx) * fy, a11 = fx * fy;
-wr += (dat[o] * a00 + dat[o + 4] * a10 + dat[o2] * a01 + dat[o2 + 4] * a11) * wt;
-wg += (dat[o + 1] * a00 + dat[o + 5] * a10 + dat[o2 + 1] * a01 + dat[o2 + 5] * a11) * wt;
-wb += (dat[o + 2] * a00 + dat[o + 6] * a10 + dat[o2 + 2] * a01 + dat[o2 + 6] * a11) * wt;
-ws += wt;
-}
-if (ws > 0) {
-var oo = (y * W + x) * 4, r8 = wr / ws, g8 = wg / ws, b8 = wb / ws;
-out[oo] = r8; out[oo + 1] = g8; out[oo + 2] = b8; out[oo + 3] = 255;
-mask[y * W + x] = 1; s0 += r8; s1 += g8; s2 += b8; rc++;
-}
-}
-rowSum[y * 3] = s0; rowSum[y * 3 + 1] = s1; rowSum[y * 3 + 2] = s2; rowCnt[y] = rc;
-if (y % 8 === 7 || y === H - 1) {
-$("progBar").style.width = ((y + 1) / H * 100).toFixed(0) + "%";
-$("progTxt").textContent = "合成中 " + Math.round((y + 1) / H * 100) + "%(" + K + "枚)";
-if (performance.now() - t0 > 12) { await tick(); t0 = performance.now(); }
-}
-}
-var srcRow = new Int32Array(H).fill(-1), anyRow = -1, yy;
-for (yy = 0; yy < H; yy++) if (rowCnt[yy] > 0) { anyRow = yy; break; }
-for (yy = 0; yy < H; yy++) {
-if (rowCnt[yy] > 0) { srcRow[yy] = yy; continue; }
-for (var dd = 1; dd < H; dd++) {
-if (yy - dd >= 0 && rowCnt[yy - dd] > 0) { srcRow[yy] = yy - dd; break; }
-if (yy + dd < H && rowCnt[yy + dd] > 0) { srcRow[yy] = yy + dd; break; }
-}
-}
-for (var fy2 = 0; fy2 < H; fy2++) {
-var sr = srcRow[fy2], ar, ag, ab;
-if (sr < 0) { ar = 34; ag = 38; ab = 44; }
-else { ar = rowSum[sr * 3] / rowCnt[sr]; ag = rowSum[sr * 3 + 1] / rowCnt[sr]; ab = rowSum[sr * 3 + 2] / rowCnt[sr]; }
-for (var fx2 = 0; fx2 < W; fx2++) {
-if (mask[fy2 * W + fx2]) continue;
-var p4 = (fy2 * W + fx2) * 4;
-out[p4] = ar; out[p4 + 1] = ag; out[p4 + 2] = ab; out[p4 + 3] = 255;
-}
-}
-var oc = document.createElement("canvas"); oc.width = W; oc.height = H;
-oc.getContext("2d").putImageData(new ImageData(out, W, H), 0, 0);
-usePano(oc, "合成画像");
-S.yaw = 0; S.pitch = 0;
-$("prog").hidden = true; $("progTxt").hidden = true; $("progBar").style.width = "0";
-busy = false; renderCapture();
-say("つなぎ合わせました。つなぎ目がずれる場合は画角を調整して、もう一度つなぎ合わせてください。", false);
-stage.scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-$("btnStitch").addEventListener("click", function () {
-stitch().catch(function () {
-busy = false; $("prog").hidden = true; $("progTxt").hidden = true; renderCapture();
-say("合成に失敗しました。出力サイズを標準にして再度お試しください。", true);
-});
-});
-var L = { on: false, stream: null, have: false, f: null, r: null, u: null, off: 0, hold: 0, lastF: null, lastT: 0, raf: 0, wake: null, listening: false };
-var lv = $("lv"), lc = $("lc"), lctx = lc.getContext("2d");
-function vnorm(a) { var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
-function vdot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
-function vmix(o, n, k) { return vnorm([o[0] + (n[0] - o[0]) * k, o[1] + (n[1] - o[1]) * k, o[2] + (n[2] - o[2]) * k]); }
-function dirOf(yaw, pitch) { var cp = Math.cos(pitch); return [cp * Math.sin(yaw), cp * Math.cos(yaw), Math.sin(pitch)]; }
-function rotZ(v, a) { var c = Math.cos(a), s = Math.sin(a); return [v[0] * c - v[1] * s, v[0] * s + v[1] * c, v[2]]; }
-function screenAngle() {
-var a = (screen.orientation && typeof screen.orientation.angle === "number") ? screen.orientation.angle : (window.orientation || 0);
-return a * D2R;
-}
-function onOri(e) {
-if (e.alpha == null || e.beta == null || e.gamma == null) return;
-var a = e.alpha * D2R, b = e.beta * D2R, g = e.gamma * D2R;
-var ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), cg = Math.cos(g), sg = Math.sin(g);
-var X = [ca * cg - sa * sb * sg, sa * cg + ca * sb * sg, -cb * sg];
-var Y = [-sa * cb, ca * cb, sb];
-var Z = [ca * sg + sa * sb * cg, sa * sg - ca * sb * cg, cb * cg];
-var th = screenAngle(), st = Math.sin(th), ct = Math.cos(th);
-var f = [-Z[0], -Z[1], -Z[2]];
-var u = [st * X[0] + ct * Y[0], st * X[1] + ct * Y[1], st * X[2] + ct * Y[2]];
-var r = [ct * X[0] - st * Y[0], ct * X[1] - st * Y[1], ct * X[2] - st * Y[2]];
-if (!L.have) { L.f = f; L.r = r; L.u = u; L.have = true; }
-else { L.f = vmix(L.f, f, 0.4); L.r = vmix(L.r, r, 0.4); L.u = vmix(L.u, u, 0.4); }
-}
-function curBasis() { return { f: rotZ(L.f, L.off), r: rotZ(L.r, L.off), u: rotZ(L.u, L.off) }; }
-function recenter() {
-if (!L.have) return;
-var bearing = Math.atan2(L.f[0], L.f[1]);
-L.off = bearing - targets[active].yaw * D2R;
-L.hold = 0;
-}
-function liveText() {
-var n = count();
-$("liveTitle").textContent = "#" + (active + 1) + " " + labelOf(targets[active]) + " に向けてください";
-$("liveSub").textContent = n + " / " + targets.length + " 枚";
-}
-async function startLive() {
-if (busy) return;
-try {
-if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-var p = await DeviceOrientationEvent.requestPermission();
-if (p !== "granted") throw new Error("motion");
-}
-} catch (e) { say("モーションセンサーの許可が必要です。許可してからもう一度押してください。", true); return; }
-if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { say("このブラウザではカメラを使えません。「撮影する」から1枚ずつ撮影してください。", true); return; }
-try {
-L.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
-} catch (e) { say("カメラを使えませんでした。ブラウザのカメラ許可を確認してください。", true); return; }
-lv.srcObject = L.stream;
-try { await lv.play(); } catch (e) {}
-L.have = false; L.hold = 0; L.lastF = null; L.lastT = 0; L.on = true;
-window.addEventListener("deviceorientation", onOri);
-$("live").hidden = false;
-try { if (navigator.wakeLock) L.wake = await navigator.wakeLock.request("screen"); } catch (e) {}
-var firstFresh = count() === 0, waited = 0;
-liveText();
-(function wait() {
-if (!L.on) return;
-if (L.have) { if (firstFresh) recenter(); L.lastT = 0; loop(performance.now()); return; }
-waited += 100;
-if (waited > 2500) { closeLive(); say("この端末ではジャイロが使えません。「撮影する」から1枚ずつ撮影してください。", true); return; }
-setTimeout(wait, 100);
-})();
-}
-function closeLive() {
-L.on = false;
-if (L.raf) cancelAnimationFrame(L.raf); L.raf = 0;
-window.removeEventListener("deviceorientation", onOri);
-if (L.stream) L.stream.getTracks().forEach(function (t) { t.stop(); });
-L.stream = null; lv.srcObject = null;
-if (L.wake) { try { L.wake.release(); } catch (e) {} L.wake = null; }
-$("live").hidden = true;
-renderCapture();
-}
-function liveShoot() {
-if (!L.on || !L.have || !lv.videoWidth) return;
-var w = lv.videoWidth, h = lv.videoHeight, k = Math.min(1, 1280 / Math.max(w, h));
-var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
-c.getContext("2d").drawImage(lv, 0, 0, c.width, c.height);
-var idx = active;
-shots[idx] = shotFromCanvas(c, curBasis());
-var fl = $("flash"); fl.classList.remove("go"); void fl.offsetWidth; fl.classList.add("go");
-if (navigator.vibrate) navigator.vibrate(30);
-L.hold = 0;
-active = nextEmpty(idx + 1);
-renderCapture();
-if (count() === targets.length) {
-closeLive();
-say("全ての位置を撮影しました。つなぎ合わせています…", false);
-stitch().catch(function () {
-busy = false; $("prog").hidden = true; $("progTxt").hidden = true; renderCapture();
-say("合成に失敗しました。出力サイズを標準にして再度お試しください。", true);
-});
-return;
-}
-liveText();
-}
-function loop(t) {
-if (!L.on) return;
-L.raf = requestAnimationFrame(loop);
-var dt = L.lastT ? Math.min(0.1, (t - L.lastT) / 1000) : 0.016;
-L.lastT = t;
-var b = curBasis(), f = b.f;
-var tv = dirOf(targets[active].yaw * D2R, targets[active].pitch * D2R);
-var err = Math.acos(clamp(vdot(f, tv), -1, 1)) / D2R;
-var speed = L.lastF ? Math.acos(clamp(vdot(f, L.lastF), -1, 1)) / D2R / dt : 99;
-L.lastF = f;
-var need = 0.6;
-if ($("liveAuto").checked && err < 4 && speed < 25) L.hold += dt; else L.hold = Math.max(0, L.hold - dt * 2);
-if (L.hold >= need) { liveShoot(); return; }
-var dpr = Math.min(window.devicePixelRatio || 1, 2);
-var W = Math.round(lc.clientWidth * dpr), H = Math.round(lc.clientHeight * dpr);
-if (lc.width !== W || lc.height !== H) { lc.width = W; lc.height = H; }
-lctx.clearRect(0, 0, W, H);
-var vw = lv.videoWidth || W, vh = lv.videoHeight || H, sc = Math.max(W / vw, H / vh);
-var half = Math.max(vw, vh) * sc / 2, F = half / Math.tan(+$("fov").value * D2R / 2);
-var cx = W / 2, cy = H / 2, u = dpr;
-lctx.lineWidth = 2 * u;
-targets.forEach(function (tg, i) {
-var d = dirOf(tg.yaw * D2R, tg.pitch * D2R), zc = vdot(d, f);
-if (zc < 0.05) return;
-var x = cx + F * vdot(d, b.r) / zc, y = cy - F * vdot(d, b.u) / zc;
-if (x < -30 || y < -30 || x > W + 30 || y > H + 30) return;
-lctx.beginPath(); lctx.arc(x, y, (i === active ? 11 : 8) * u, 0, 7);
-if (shots[i]) { lctx.fillStyle = "rgba(108,195,224,.85)"; lctx.fill(); }
-else { lctx.strokeStyle = "rgba(255,255,255,.55)"; lctx.stroke(); }
-if (i === active) {
-lctx.strokeStyle = "#f2c14e"; lctx.lineWidth = 3 * u;
-lctx.beginPath(); lctx.arc(x, y, 24 * u, 0, 7); lctx.stroke();
-if (L.hold > 0) { lctx.lineWidth = 5 * u; lctx.beginPath(); lctx.arc(x, y, 24 * u, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, L.hold / need)); lctx.stroke(); }
-lctx.lineWidth = 2 * u;
-}
-});
-var ax = vdot(tv, b.r), ay = -vdot(tv, b.u), al = Math.hypot(ax, ay) || 1;
-var tz = vdot(tv, f), tx = cx + F * vdot(tv, b.r) / Math.max(tz, 0.05), ty = cy - F * vdot(tv, b.u) / Math.max(tz, 0.05);
-var off = tz < 0.2 || tx < 0 || ty < 0 || tx > W || ty > H;
-if (off) {
-var rr = Math.min(W, H) * 0.34, ang = Math.atan2(ay / al, ax / al);
-lctx.save(); lctx.translate(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr); lctx.rotate(ang);
-lctx.fillStyle = "#f2c14e"; lctx.beginPath(); lctx.moveTo(18 * u, 0); lctx.lineTo(-10 * u, -13 * u); lctx.lineTo(-10 * u, 13 * u); lctx.closePath(); lctx.fill();
-lctx.restore();
-}
-lctx.strokeStyle = "rgba(255,255,255,.9)"; lctx.lineWidth = 2 * u;
-lctx.beginPath(); lctx.arc(cx, cy, 14 * u, 0, 7); lctx.stroke();
-lctx.beginPath(); lctx.moveTo(cx - 6 * u, cy); lctx.lineTo(cx + 6 * u, cy); lctx.moveTo(cx, cy - 6 * u); lctx.lineTo(cx, cy + 6 * u); lctx.stroke();
-}
-$("btnLive").addEventListener("click", startLive);
-$("liveClose").addEventListener("click", function () { closeLive(); say(count() ? count() + " 枚撮影済みです。続きを撮るか、つなぎ合わせてください。" : "", false); });
-$("liveShutter").addEventListener("click", liveShoot);
-$("liveRecenter").addEventListener("click", recenter);
-document.addEventListener("visibilitychange", function () { if (document.hidden && L.on) closeLive(); });
-var deferred = null;
-window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; $("btnInstall").hidden = false; });
-$("btnInstall").addEventListener("click", async function () {
-if (!deferred) return;
-deferred.prompt(); try { await deferred.userChoice; } catch (e) {}
-deferred = null; $("btnInstall").hidden = true;
-});
-window.addEventListener("appinstalled", function () { $("btnInstall").hidden = true; });
-var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
-if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone) $("iosHint").hidden = false;
-if ("serviceWorker" in navigator && location.protocol === "https:") {
-window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });
-}
-setPattern("ring");
-usePano(drawSample(), "サンプル");
-resize();
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var D2R = Math.PI / 180;
+  var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+  var msgEl = $("msg");
+  function say(t, err) { msgEl.textContent = t || ""; msgEl.className = "msg" + (err ? " err" : ""); }
+
+  /* ================= Viewer (WebGL) ================= */
+  var view = $("view"), stage = $("stage");
+  var S = { mode: "rect", yaw: 0, pitch: 0, fov: 1.571, scale: 1.5, vYaw: 0, vPitch: 0, spin: false };
+  var gl = null, glOK = false, texReady = false, maxTex = 2048;
+  var uRes, uLook, uFov, uMode, tex;
+
+  var VS = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+  var FS = [
+    "#ifdef GL_FRAGMENT_PRECISION_HIGH", "precision highp float;", "#else", "precision mediump float;", "#endif",
+    "uniform sampler2D tex;uniform vec2 res;uniform vec2 look;uniform float fov;uniform float mode;",
+    "const float PI=3.14159265359;",
+    "void main(){",
+    "  vec2 ndc=(gl_FragCoord.xy-0.5*res)/(0.5*res.y);",
+    "  vec3 d;float cy=cos(look.x),sy=sin(look.x);",
+    "  if(mode<0.5){",
+    "    float t=tan(fov*0.5);",
+    "    vec3 v=normalize(vec3(ndc.x*t,ndc.y*t,-1.0));",
+    "    float cp=cos(look.y),sp=sin(look.y);",
+    "    v=vec3(v.x,v.y*cp-v.z*sp,v.y*sp+v.z*cp);",
+    "    d=vec3(v.x*cy-v.z*sy,v.y,v.x*sy+v.z*cy);",
+    "  }else{",
+    "    vec2 q=ndc*fov*0.9;float r2=dot(q,q);",
+    "    vec3 v=vec3(2.0*q.x,r2-1.0,-2.0*q.y)/(r2+1.0);",
+    "    d=vec3(v.x*cy-v.z*sy,v.y,v.x*sy+v.z*cy);",
+    "  }",
+    "  float lon=atan(d.x,-d.z);float lat=asin(clamp(d.y,-1.0,1.0));",
+    "  vec2 uv=vec2(lon/(2.0*PI)+0.5,0.5-lat/PI);",
+    "  gl_FragColor=vec4(texture2D(tex,uv).rgb,1.0);",
+    "}"
+  ].join("\n");
+
+  function initGL() {
+    gl = view.getContext("webgl", { antialias: false, alpha: false });
+    if (!gl) throw new Error("webgl");
+    function sh(type, src) {
+      var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      return s;
+    }
+    var prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link");
+    gl.useProgram(prog);
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog, "p");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    uRes = gl.getUniformLocation(prog, "res");
+    uLook = gl.getUniformLocation(prog, "look");
+    uFov = gl.getUniformLocation(prog, "fov");
+    uMode = gl.getUniformLocation(prog, "mode");
+    gl.uniform1i(gl.getUniformLocation(prog, "tex"), 0);
+    tex = gl.createTexture();
+    maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 2048;
+    glOK = true;
+  }
+  try { initGL(); } catch (e) { say("このブラウザではWebGLが使えないため、全天球を表示できません。", true); }
+
+  function uploadTexture(canvas) {
+    if (!glOK) return;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    texReady = true;
+  }
+
+  function pad(n, len) { var s = String(Math.abs(Math.round(n))); while (s.length < len) s = "0" + s; return s; }
+  function updateHud() {
+    var yawDeg = ((S.yaw / D2R) % 360 + 360) % 360;
+    $("vYaw").textContent = pad(yawDeg === 360 ? 0 : yawDeg, 3) + "°";
+    if (S.mode === "rect") {
+      var p = S.pitch / D2R;
+      $("vPitch").textContent = (p < 0 ? "−" : "+") + pad(p, 2) + "°";
+      $("lFov").textContent = "視野";
+      $("vFov").textContent = Math.round(S.fov / D2R) + "°";
+    } else {
+      $("vPitch").textContent = "−90°";
+      $("lFov").textContent = "倍率";
+      $("vFov").textContent = "×" + (1.5 / S.scale).toFixed(1);
+    }
+  }
+
+  var raf = 0, lastT = 0, dragging = false;
+  function draw() {
+    if (!glOK || !texReady) return;
+    var w = view.width, h = view.height;
+    if (!w || !h) return;
+    gl.viewport(0, 0, w, h);
+    gl.uniform2f(uRes, w, h);
+    gl.uniform2f(uLook, S.yaw, S.pitch);
+    gl.uniform1f(uFov, S.mode === "rect" ? S.fov : S.scale);
+    gl.uniform1f(uMode, S.mode === "rect" ? 0 : 1);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    updateHud();
+  }
+  function frame(t) {
+    raf = 0;
+    var dt = lastT ? Math.min(0.05, (t - lastT) / 1000) : 0.016;
+    lastT = t;
+    var moving = false;
+    if (!dragging) {
+      if (Math.abs(S.vYaw) > 0.01 || Math.abs(S.vPitch) > 0.01) {
+        S.yaw += S.vYaw * dt;
+        S.pitch = clamp(S.pitch + S.vPitch * dt, -1.55, 1.55);
+        var decay = Math.pow(0.03, dt);
+        S.vYaw *= decay; S.vPitch *= decay;
+        moving = true;
+      } else { S.vYaw = 0; S.vPitch = 0; }
+      if (S.spin) { S.yaw += 0.22 * dt; moving = true; }
+    }
+    draw();
+    if (moving || dragging) raf = requestAnimationFrame(frame); else lastT = 0;
+  }
+  function requestDraw() { if (!raf) raf = requestAnimationFrame(frame); }
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = Math.round(view.clientWidth * dpr), h = Math.round(view.clientHeight * dpr);
+    if (w && h && (view.width !== w || view.height !== h)) { view.width = w; view.height = h; }
+    requestDraw();
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); else window.addEventListener("resize", resize);
+
+  function zoom(f) {
+    if (S.mode === "rect") S.fov = clamp(S.fov * f, 0.35, 2.0);
+    else S.scale = clamp(S.scale * f, 0.9, 2.6);
+    requestDraw();
+  }
+
+  var ptrs = new Map(), pinch = 0, lastMove = 0;
+  function pinchDist() {
+    var a = Array.from(ptrs.values());
+    return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) || 1;
+  }
+  view.addEventListener("pointerdown", function (e) {
+    try { view.setPointerCapture(e.pointerId); } catch (err) {}
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    S.vYaw = 0; S.vPitch = 0;
+    if (ptrs.size === 1) { dragging = true; lastMove = e.timeStamp; }
+    else if (ptrs.size === 2) { pinch = pinchDist(); }
+    requestDraw();
+  });
+  view.addEventListener("pointermove", function (e) {
+    var p = ptrs.get(e.pointerId);
+    if (!p) return;
+    var ox = p.x, oy = p.y;
+    p.x = e.clientX; p.y = e.clientY;
+    if (ptrs.size === 1) {
+      var dt = Math.max(0.008, (e.timeStamp - lastMove) / 1000);
+      lastMove = e.timeStamp;
+      var r = view.getBoundingClientRect();
+      if (S.mode === "rect") {
+        var k = S.fov / r.height;
+        var dYaw = -(p.x - ox) * k, dPitch = (p.y - oy) * k;
+        var np = clamp(S.pitch + dPitch, -1.55, 1.55);
+        if (np !== S.pitch + dPitch) dPitch = 0;
+        S.yaw += dYaw; S.pitch = np;
+        S.vYaw = clamp(dYaw / dt, -6, 6); S.vPitch = clamp(dPitch / dt, -6, 6);
+      } else {
+        var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        var a1 = Math.atan2(ox - cx, -(oy - cy)), a2 = Math.atan2(p.x - cx, -(p.y - cy));
+        var da = a2 - a1; da = Math.atan2(Math.sin(da), Math.cos(da));
+        S.yaw -= da; S.vYaw = clamp(-da / dt, -6, 6);
+      }
+    } else if (ptrs.size === 2) {
+      var nd = pinchDist();
+      zoom(pinch / nd);
+      pinch = nd;
+    }
+    requestDraw();
+  });
+  function endPtr(e) {
+    ptrs.delete(e.pointerId);
+    if (e.timeStamp - lastMove > 90) { S.vYaw = 0; S.vPitch = 0; }
+    if (ptrs.size === 0) dragging = false;
+    requestDraw();
+  }
+  view.addEventListener("pointerup", endPtr);
+  view.addEventListener("pointercancel", endPtr);
+  view.addEventListener("wheel", function (e) { e.preventDefault(); zoom(Math.exp(e.deltaY * 0.0012)); }, { passive: false });
+  view.addEventListener("keydown", function (e) {
+    var step = 0.08 * (S.mode === "rect" ? S.fov : 1), used = true;
+    if (e.key === "ArrowLeft") S.yaw -= step;
+    else if (e.key === "ArrowRight") S.yaw += step;
+    else if (e.key === "ArrowUp" && S.mode === "rect") S.pitch = clamp(S.pitch + step, -1.55, 1.55);
+    else if (e.key === "ArrowDown" && S.mode === "rect") S.pitch = clamp(S.pitch - step, -1.55, 1.55);
+    else if (e.key === "+" || e.key === "=") zoom(0.9);
+    else if (e.key === "-") zoom(1.1);
+    else used = false;
+    if (used) { e.preventDefault(); requestDraw(); }
+  });
+
+  document.querySelectorAll("[data-mode]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      S.mode = b.getAttribute("data-mode");
+      document.querySelectorAll("[data-mode]").forEach(function (x) { x.classList.toggle("on", x === b); });
+      requestDraw();
+    });
+  });
+  $("btnSpin").addEventListener("click", function () {
+    S.spin = !S.spin; this.setAttribute("aria-pressed", String(S.spin)); requestDraw();
+  });
+  $("btnReset").addEventListener("click", function () {
+    S.yaw = 0; S.pitch = 0; S.fov = 1.571; S.scale = 1.5; S.vYaw = 0; S.vPitch = 0; requestDraw();
+  });
+
+  /* ---------- panorama source ---------- */
+  var pano = null, panoLabel = "";
+  var dlApi = null;
+  function usePano(canvas, label) {
+    pano = canvas; panoLabel = label;
+    uploadTexture(canvas);
+    $("srcChip").textContent = label;
+    $("btnSave").disabled = !dlApi || label === "サンプル";
+    requestDraw();
+  }
+
+  function makeEquirect(src, sw, sh) {
+    var W = (sw >= 3000 && maxTex >= 4096) ? 4096 : 2048, H = W / 2;
+    var c = document.createElement("canvas"); c.width = W; c.height = H;
+    var g = c.getContext("2d");
+    if (Math.abs(sw / sh - 2) < 0.08) {
+      g.drawImage(src, 0, 0, W, H);
+      return { canvas: c, exact: true };
+    }
+    var gr = g.createLinearGradient(0, 0, 0, H);
+    gr.addColorStop(0, "#1c2a38"); gr.addColorStop(0.5, "#2a3138"); gr.addColorStop(0.5, "#1a1613"); gr.addColorStop(1, "#0e0c0a");
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    var dh = W * sh / sw;
+    g.drawImage(src, 0, (H - dh) / 2, W, dh);
+    return { canvas: c, exact: false };
+  }
+
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("decode")); };
+      img.src = url;
+    });
+  }
+
+  async function openPano(file) {
+    if (!file) return;
+    try {
+      var img = await loadImage(file);
+      var r = makeEquirect(img, img.naturalWidth, img.naturalHeight);
+      usePano(r.canvas, file.name.length > 28 ? file.name.slice(0, 25) + "…" : file.name);
+      S.yaw = 0; S.pitch = 0;
+      say(r.exact ? "画像を読み込みました。" : "縦横比が2:1ではないため、横幅いっぱいを360°として中央に配置しました。", false);
+    } catch (e) { say("画像を読み込めませんでした。JPEGまたはPNGを選んでください。", true); }
+  }
+  $("btnOpen").addEventListener("click", function () { $("filePano").click(); });
+  $("filePano").addEventListener("change", function (e) { var f = e.target.files[0]; e.target.value = ""; openPano(f); });
+  ["dragover", "dragenter"].forEach(function (n) {
+    stage.addEventListener(n, function (e) { e.preventDefault(); stage.classList.add("drop"); });
+  });
+  ["dragleave", "drop"].forEach(function (n) {
+    stage.addEventListener(n, function (e) { e.preventDefault(); stage.classList.remove("drop"); });
+  });
+  stage.addEventListener("drop", function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && /^image\//.test(f.type)) openPano(f);
+  });
+
+  /* ---------- save (JPEG + Google photo-sphere XMP) ---------- */
+  function addGPano(buf, W, H) {
+    var u8 = new Uint8Array(buf);
+    var xml = '<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>' +
+      '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
+      '<rdf:Description rdf:about="" xmlns:GPano="http://ns.google.com/photos/1.0/panorama/" ' +
+      'GPano:ProjectionType="equirectangular" GPano:UsePanoramaViewer="True" ' +
+      'GPano:FullPanoWidthPixels="' + W + '" GPano:FullPanoHeightPixels="' + H + '" ' +
+      'GPano:CroppedAreaImageWidthPixels="' + W + '" GPano:CroppedAreaImageHeightPixels="' + H + '" ' +
+      'GPano:CroppedAreaLeftPixels="0" GPano:CroppedAreaTopPixels="0" GPano:PoseHeadingDegrees="0"/>' +
+      '</rdf:RDF></x:xmpmeta><?xpacket end="w"?>';
+    var head = new TextEncoder().encode("http://ns.adobe.com/xap/1.0/\0");
+    var body = new TextEncoder().encode(xml);
+    var len = 2 + head.length + body.length;
+    var seg = new Uint8Array(2 + len);
+    seg[0] = 0xFF; seg[1] = 0xE1; seg[2] = len >> 8; seg[3] = len & 255;
+    seg.set(head, 4); seg.set(body, 4 + head.length);
+    var pos = 2;
+    if (u8[2] === 0xFF && u8[3] === 0xE0) pos = 4 + ((u8[4] << 8) | u8[5]);
+    var out = new Uint8Array(u8.length + seg.length);
+    out.set(u8.subarray(0, pos), 0); out.set(seg, pos); out.set(u8.subarray(pos), pos + seg.length);
+    return out;
+  }
+  $("btnSave").addEventListener("click", function () {
+    if (!pano || !dlApi) return;
+    var W = pano.width, H = pano.height;
+    pano.toBlob(async function (blob) {
+      if (!blob) { say("JPEGを作成できませんでした。", true); return; }
+      try {
+        var data = addGPano(await blob.arrayBuffer(), W, H);
+        var d = new Date(), p2 = function (n) { return (n < 10 ? "0" : "") + n; };
+        var name = "sphere-" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + "-" + p2(d.getHours()) + p2(d.getMinutes()) + ".jpg";
+        await dlApi.save({ filename: name, data: new Blob([data], { type: "image/jpeg" }) });
+        say("保存しました。Googleフォトなどで360°写真として開けます。", false);
+      } catch (err) {
+        if (err && err.code === "declined") return;
+        say("この画面では保存できませんでした。", true);
+      }
+    }, "image/jpeg", 0.92);
+  });
+  dlApi = {
+    save: async function (o) {
+      var file = new File([o.data], o.filename, { type: "image/jpeg" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: "全天球カメラ" }); return; }
+        catch (e) { if (e && e.name === "AbortError") throw { code: "declined" }; }
+      }
+      var url = URL.createObjectURL(file), a = document.createElement("a");
+      a.href = url; a.download = o.filename; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    }
+  };
+  $("btnSave").hidden = false; $("btnSave").disabled = !pano || panoLabel === "サンプル";
+
+  /* ---------- sample panorama ---------- */
+  function drawSample() {
+    var W = 2048, H = 1024, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var g = c.getContext("2d");
+    var gr = g.createLinearGradient(0, 0, 0, H / 2);
+    gr.addColorStop(0, "#0a1320"); gr.addColorStop(0.55, "#27506b"); gr.addColorStop(0.86, "#c98f6a"); gr.addColorStop(1, "#f0c27f");
+    g.fillStyle = gr; g.fillRect(0, 0, W, H / 2);
+    var sx = (20 + 180) / 360 * W, sy = H / 2 - H * 8 / 180;
+    gr = g.createRadialGradient(sx, sy, 0, sx, sy, 180);
+    gr.addColorStop(0, "rgba(255,238,196,.95)"); gr.addColorStop(0.12, "rgba(255,214,150,.55)"); gr.addColorStop(1, "rgba(255,190,120,0)");
+    g.fillStyle = gr; g.fillRect(0, 0, W, H / 2);
+    function ridge(amp, col, ph, ks) {
+      g.beginPath(); g.moveTo(0, H / 2);
+      for (var x = 0; x <= W; x += 4) {
+        var a = 0;
+        for (var i = 0; i < ks.length; i++) a += Math.sin(2 * Math.PI * ks[i] * x / W + ph * (i + 1)) / (i + 1);
+        g.lineTo(x, H / 2 - amp * (0.5 + 0.5 * a / 1.83));
+      }
+      g.lineTo(W, H / 2); g.closePath(); g.fillStyle = col; g.fill();
+    }
+    ridge(46, "#1a2a38", 1.3, [3, 7, 13]);
+    ridge(30, "#0f1b25", 0.4, [5, 11, 19]);
+    gr = g.createLinearGradient(0, H / 2, 0, H);
+    gr.addColorStop(0, "#1f1b17"); gr.addColorStop(1, "#090807");
+    g.fillStyle = gr; g.fillRect(0, H / 2, W, H / 2);
+    g.lineWidth = 1; g.strokeStyle = "rgba(255,255,255,.13)";
+    var i2, x2, y2;
+    for (i2 = 0; i2 < 12; i2++) { x2 = i2 / 12 * W; g.beginPath(); g.moveTo(x2, 0); g.lineTo(x2, H); g.stroke(); }
+    for (i2 = -75; i2 <= 75; i2 += 15) {
+      if (i2 === 0) continue;
+      y2 = H / 2 - i2 / 180 * H; g.beginPath(); g.moveTo(0, y2); g.lineTo(W, y2); g.stroke();
+    }
+    g.lineWidth = 2; g.strokeStyle = "rgba(242,193,78,.6)";
+    g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
+    g.textAlign = "center"; g.fillStyle = "rgba(255,255,255,.72)";
+    g.font = '500 22px ui-monospace, Menlo, monospace';
+    for (var deg = 0; deg < 360; deg += 30) {
+      var th = deg > 180 ? deg - 360 : deg, xx = (th / 360 + 0.5) * W;
+      g.fillText(deg + "°", xx, H / 2 + 32);
+      if (deg === 180) g.fillText(deg + "°", 0, H / 2 + 32);
+    }
+    for (var la = -60; la <= 60; la += 30) {
+      if (la === 0) continue;
+      g.fillText((la > 0 ? "+" : "−") + Math.abs(la) + "°", W / 2 + 54, H / 2 - la / 180 * H + 8);
+    }
+    var card = [["N", "北", W / 2], ["E", "東", W * 0.75], ["S", "南", 0], ["S", "南", W], ["W", "西", W * 0.25]];
+    card.forEach(function (k) {
+      g.fillStyle = "#f2c14e"; g.font = '700 84px system-ui, "Hiragino Sans", sans-serif';
+      g.fillText(k[0], k[2], H / 2 - 92);
+      g.fillStyle = "rgba(255,255,255,.8)"; g.font = '500 32px system-ui, "Hiragino Sans", sans-serif';
+      g.fillText(k[1], k[2], H / 2 - 52);
+    });
+    return c;
+  }
+
+  /* ================= Capture plan & photos ================= */
+  var targets = [], shots = [], active = 0, pattern = "ring", busy = false, pendingIndex = 0;
+  var frameAspect = 0.75; // short side / long side of one photo
+  function setStep(n) { for (var i = 1; i <= 3; i++) { var el = $("st" + i); el.classList.toggle("cur", i === n); el.classList.toggle("done", i < n); } }
+  // photo shape decides how many shots are needed: a tall 16:9 frame sees much less sideways than a 4:3 one
+  function setAspect(w, h) {
+    var a = Math.min(w, h) / Math.max(w, h);
+    if (Math.abs(a - frameAspect) < 0.02) return;
+    frameAspect = a;
+    if (count() === 0) rebuild(pattern, true);
+  }
+  function fovLong() { return +$("fov").value; }
+  function hfovDeg() { return 2 * Math.atan(Math.tan(fovLong() * D2R / 2) * frameAspect) / D2R; }
+
+  // Rings are spaced so that neighbouring photos overlap by about 30%.
+  function makePattern(kind) {
+    var L = fovLong(), hf = hfovDeg(), t = [];
+    var rowGap = Math.min(55, Math.max(30, Math.round(L * 0.7)));
+    function ring(pitch, offset) {
+      var n = Math.max(5, Math.ceil(360 * Math.cos(pitch * D2R) / (hf * 0.7)));
+      for (var i = 0; i < n; i++) t.push({ yaw: Math.round(((i + offset) * 360 / n) % 360 * 10) / 10, pitch: pitch });
+    }
+    ring(0, 0);
+    if (kind === "full") {
+      ring(rowGap, 0.5); ring(-rowGap, 0.5);
+      t.push({ yaw: 0, pitch: 90 }); t.push({ yaw: 0, pitch: -90 });
+    }
+    return t;
+  }
+  function labelOf(t) {
+    if (t.pitch === 90) return "真上";
+    if (t.pitch === -90) return "真下";
+    var row = t.pitch === 0 ? "水平" : (t.pitch > 0 ? "上向き" : "下向き") + Math.abs(Math.round(t.pitch)) + "°";
+    var y = Math.round(t.yaw), dir = y === 0 ? "正面" : (y > 180 ? "左へ" + (360 - y) : "右へ" + y) + "°";
+    return row + "・" + dir;
+  }
+  function count() { var n = 0; shots.forEach(function (s) { if (s) n++; }); return n; }
+  function nextEmpty(from) {
+    var n = targets.length;
+    for (var k = 0; k < n; k++) { var i = (from + k) % n; if (!shots[i]) return i; }
+    return from % n;
+  }
+  function describePattern() {
+    var n = targets.length, min = Math.max(1, Math.round(n * 5 / 60));
+    $("patDesc").textContent = (pattern === "ring" ? "目の高さで、その場をぐるっと水平に1周します。" : "水平の1周に加えて、上と下も撮ります。") + n + "枚、約" + min + "分で撮れます。";
+  }
+  function renderCapture() {
+    var small = targets.length > 22, dr = small ? 4.6 : 6;
+    var s = '<circle class="ring" r="92"/><circle class="ring" r="69"/><circle class="ring h" r="46"/><circle class="ring" r="23"/>' +
+      '<text class="lbl" x="0" y="-98" text-anchor="middle">正面</text>';
+    targets.forEach(function (t, i) {
+      var r = (90 - t.pitch) / 180 * 92, a = t.yaw * D2R;
+      s += '<circle class="dot' + (shots[i] ? " done" : "") + (i === active ? " active" : "") + '" data-i="' + i +
+        '" cx="' + (r * Math.sin(a)).toFixed(1) + '" cy="' + (-r * Math.cos(a)).toFixed(1) + '" r="' + dr + '" tabindex="0" role="button" aria-label="#' + (i + 1) + " " + labelOf(t) + '"/>';
+    });
+    $("dial").innerHTML = s;
+    $("slots").innerHTML = targets.map(function (t, i) {
+      return '<button type="button" class="slot' + (i === active ? " active" : "") + '" data-i="' + i + '" aria-label="#' + (i + 1) + " " + labelOf(t) + '"><span>' + (i + 1) + "</span>" +
+        (shots[i] ? '<img alt="" src="' + shots[i].thumb + '">' : "") + "</button>";
+    }).join("");
+    var n = count();
+    $("nextTitle").textContent = (n === targets.length ? "全て撮影済み" : "#" + (active + 1) + " " + labelOf(targets[active]));
+    $("nextSub").textContent = n + " / " + targets.length + " 枚";
+    $("btnShoot").textContent = shots[active] ? "この位置を撮り直す" : "この位置を1枚撮る";
+    $("btnStitch").disabled = busy || n < 2;
+    if (!busy && n < targets.length) setStep(1); else if (!busy && n === targets.length) setStep(2);
+    $("btnShoot").disabled = busy; $("btnLive").disabled = busy; $("btnPick").disabled = busy; $("btnClear").disabled = busy;
+  }
+  function selectSlot(i) { active = i; renderCapture(); }
+  $("dial").addEventListener("click", function (e) { var d = e.target.closest("[data-i]"); if (d) selectSlot(+d.getAttribute("data-i")); });
+  $("dial").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var d = e.target.closest("[data-i]"); if (d) { e.preventDefault(); selectSlot(+d.getAttribute("data-i")); }
+  });
+  $("slots").addEventListener("click", function (e) { var d = e.target.closest("[data-i]"); if (d) selectSlot(+d.getAttribute("data-i")); });
+
+  function rebuild(kind, force) {
+    if (!force && count() > 0) return false;
+    pattern = kind; targets = makePattern(kind);
+    shots = targets.map(function () { return null; }); active = 0;
+    document.querySelectorAll("[data-pat]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-pat") === kind); });
+    describePattern(); renderCapture();
+    return true;
+  }
+  document.querySelectorAll("[data-pat]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (busy) return;
+      var kind = b.getAttribute("data-pat");
+      if (kind === pattern) return;
+      if (!rebuild(kind, false)) say("撮影済みの写真があります。撮る範囲を変えるには、先に「最初からやり直す」を押してください。", true);
+    });
+  });
+
+  async function fileToShot(file) {
+    var img = await loadImage(file);
+    var w = img.naturalWidth, h = img.naturalHeight;
+    if (count() === 0) { setAspect(w, h); pendingIndex = Math.min(pendingIndex, targets.length - 1); }
+    var k = Math.min(1, 1280 / Math.max(w, h));
+    var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return shotFromCanvas(c, null);
+  }
+  function shotFromCanvas(c, basisObj) {
+    var tk = 120 / Math.max(c.width, c.height), t = document.createElement("canvas");
+    t.width = Math.max(1, Math.round(c.width * tk)); t.height = Math.max(1, Math.round(c.height * tk));
+    t.getContext("2d").drawImage(c, 0, 0, t.width, t.height);
+    return { canvas: c, thumb: t.toDataURL("image/jpeg", 0.65), basis: basisObj, sensor: !!basisObj };
+  }
+  $("btnShoot").addEventListener("click", function () { pendingIndex = active; $("fileCam").click(); });
+  $("fileCam").addEventListener("change", async function (e) {
+    var f = e.target.files[0]; e.target.value = "";
+    if (!f) return;
+    try {
+      shots[pendingIndex] = await fileToShot(f);
+      active = nextEmpty(pendingIndex + 1);
+      renderCapture();
+      say(count() === targets.length ? "全ての位置を撮影しました。「つなぎ合わせる」を押してください。" : "撮れました。次は「" + labelOf(targets[active]) + "」の向きで撮影してください。", false);
+    } catch (err) { say("写真を読み込めませんでした。もう一度撮影してください。", true); }
+  });
+  $("btnPick").addEventListener("click", function () { $("filePick").click(); });
+  $("filePick").addEventListener("change", async function (e) {
+    var files = Array.from(e.target.files); e.target.value = "";
+    if (!files.length) return;
+    files.sort(function (a, b) { return (a.lastModified - b.lastModified) || (a.name < b.name ? -1 : 1); });
+    var idx = nextEmpty(0), used = 0;
+    try {
+      for (var i = 0; i < files.length && idx < targets.length; i++) { shots[idx] = await fileToShot(files[i]); used++; idx++; }
+      active = nextEmpty(0);
+      renderCapture();
+      say(used + "枚を、撮影した順にダイヤルの位置へ割り当てました。" + (files.length > used ? "位置の数を超えた" + (files.length - used) + "枚は使っていません。" : ""), false);
+    } catch (err) { renderCapture(); say("写真を読み込めませんでした。", true); }
+  });
+  var clearTimer = 0;
+  $("btnClear").addEventListener("click", function () {
+    var b = this;
+    if (!clearTimer) {
+      b.textContent = "もう一度押すと全て消えます";
+      clearTimer = setTimeout(function () { clearTimer = 0; b.textContent = "最初からやり直す"; }, 3000);
+      return;
+    }
+    clearTimeout(clearTimer); clearTimer = 0; b.textContent = "最初からやり直す";
+    rebuild(pattern, true);
+    say("撮影した写真を消しました。最初から撮影できます。", false);
+  });
+  $("fov").addEventListener("input", function () {
+    $("fovOut").textContent = this.value + "°";
+    if (count() === 0) rebuild(pattern, true);
+  });
+
+  /* ================= Stitching with auto-calibration ================= */
+  function basis(yaw, pitch) {
+    var cp = Math.cos(pitch), sp = Math.sin(pitch), cy = Math.cos(yaw), sy = Math.sin(yaw);
+    var f = [cp * sy, cp * cy, sp], r = [cy, -sy, 0];
+    var u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
+    return { f: f, r: r, u: u };
+  }
+  function tick() { return new Promise(function (res) { setTimeout(res, 0); }); }
+  function vcross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function vdot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function rodrigues(v, ax, ang) {
+    var c = Math.cos(ang), s = Math.sin(ang), d = vdot(ax, v) * (1 - c), cr = vcross(ax, v);
+    return [v[0] * c + cr[0] * s + ax[0] * d, v[1] * c + cr[1] * s + ax[1] * d, v[2] * c + cr[2] * s + ax[2] * d];
+  }
+  // rotate a camera basis: a = turn about its up axis, p = about its right axis, r = about its view axis (degrees)
+  function tweak(b, a, p, r) {
+    var f1 = rodrigues(b.f, b.u, a * D2R), r1 = rodrigues(b.r, b.u, a * D2R);
+    var f2 = rodrigues(f1, r1, p * D2R), u2 = rodrigues(b.u, r1, p * D2R);
+    return { f: f2, r: rodrigues(r1, f2, r * D2R), u: rodrigues(u2, f2, r * D2R) };
+  }
+
+  var SM = 288; // working size (long side) used for alignment analysis
+  function boxBlur(src, w, h, rad) {
+    var tmp = new Float32Array(w * h), out = new Float32Array(w * h), x, y, i, s, n = 2 * rad + 1;
+    for (y = 0; y < h; y++) {
+      s = 0; for (i = -rad; i <= rad; i++) s += src[y * w + clamp(i, 0, w - 1)];
+      for (x = 0; x < w; x++) {
+        tmp[y * w + x] = s / n;
+        s += src[y * w + Math.min(w - 1, x + rad + 1)] - src[y * w + Math.max(0, x - rad)];
+      }
+    }
+    for (x = 0; x < w; x++) {
+      s = 0; for (i = -rad; i <= rad; i++) s += tmp[clamp(i, 0, h - 1) * w + x];
+      for (y = 0; y < h; y++) {
+        out[y * w + x] = s / n;
+        s += tmp[Math.min(h - 1, y + rad + 1) * w + x] - tmp[Math.max(0, y - rad) * w + x];
+      }
+    }
+    return out;
+  }
+  // small working copy: RGB for colour matching + exposure-independent high-pass (log luminance) maps at three
+  // scales for alignment (coarse first, so a photo that is several degrees off can still find its place)
+  function hpMap(d, w, h, rad) {
+    var lg = new Float32Array(w * h), i;
+    for (i = 0; i < w * h; i++) lg[i] = Math.log(1 + 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]);
+    // band-pass: light blur (removes sensor noise) minus wide blur (removes exposure / vignetting)
+    var sm1 = boxBlur(boxBlur(lg, w, h, 1), w, h, 1), bl = boxBlur(boxBlur(lg, w, h, rad), w, h, rad), hp = new Float32Array(w * h);
+    for (i = 0; i < w * h; i++) hp[i] = sm1[i] - bl[i];
+    return hp;
+  }
+  function makeSmall(cv) {
+    var k = SM / Math.max(cv.width, cv.height), w = Math.max(16, Math.round(cv.width * k)), h = Math.max(16, Math.round(cv.height * k));
+    var c = document.createElement("canvas"); c.width = w; c.height = h;
+    var g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(cv, 0, 0, w, h);
+    var d = g.getImageData(0, 0, w, h).data, lv = [];
+    [[40, 2], [72, 3], [144, 4], [SM, 5]].forEach(function (cfg) {
+      if (cfg[0] === SM) { lv.push({ w: w, h: h, hp: hpMap(d, w, h, cfg[1]) }); return; }
+      var kk = cfg[0] / Math.max(w, h), lw = Math.max(12, Math.round(w * kk)), lh = Math.max(12, Math.round(h * kk));
+      var c2 = document.createElement("canvas"); c2.width = lw; c2.height = lh;
+      var g2 = c2.getContext("2d"); g2.imageSmoothingQuality = "high"; g2.drawImage(c, 0, 0, lw, lh);
+      lv.push({ w: lw, h: lh, hp: hpMap(g2.getImageData(0, 0, lw, lh).data, lw, lh, cfg[1]) });
+    });
+    return { w: w, h: h, rgb: d, lv: lv };
+  }
+  var PV = 0; // out-of-image marker for sampleHP
+  // bilinear sample of the high-pass map; returns NaN when the direction is outside the picture
+  function sampleHP(m, B, F, dx, dy, dz) {   // m: {w,h,hp} level map; F in that map's pixels
+    var z = dx * B.f[0] + dy * B.f[1] + dz * B.f[2];
+    if (z <= 0.05) return NaN;
+    var ix = m.w * 0.5 + F * (dx * B.r[0] + dy * B.r[1] + dz * B.r[2]) / z;
+    var iy = m.h * 0.5 - F * (dx * B.u[0] + dy * B.u[1] + dz * B.u[2]) / z;
+    if (ix < 3 || iy < 3 || ix >= m.w - 4 || iy >= m.h - 4) return NaN;
+    var px = ix | 0, py = iy | 0, fx = ix - px, fy = iy - py, o = py * m.w + px, hp = m.hp;
+    return hp[o] * (1 - fx) * (1 - fy) + hp[o + 1] * fx * (1 - fy) + hp[o + m.w] * (1 - fx) * fy + hp[o + m.w + 1] * fx * fy;
+  }
+  function sampleRGB(m, B, F, dx, dy, dz, out) {
+    var z = dx * B.f[0] + dy * B.f[1] + dz * B.f[2];
+    if (z <= 0.05) return false;
+    var ix = m.w * 0.5 + F * (dx * B.r[0] + dy * B.r[1] + dz * B.r[2]) / z;
+    var iy = m.h * 0.5 - F * (dx * B.u[0] + dy * B.u[1] + dz * B.u[2]) / z;
+    if (ix < 3 || iy < 3 || ix >= m.w - 4 || iy >= m.h - 4) return false;
+    var px = ix | 0, py = iy | 0, fx = ix - px, fy = iy - py, o = (py * m.w + px) * 4, o2 = o + m.w * 4, d = m.rgb;
+    var a = (1 - fx) * (1 - fy), b = fx * (1 - fy), c = (1 - fx) * fy, e = fx * fy;
+    out[0] = d[o] * a + d[o + 4] * b + d[o2] * c + d[o2 + 4] * e;
+    out[1] = d[o + 1] * a + d[o + 5] * b + d[o2 + 1] * c + d[o2 + 5] * e;
+    out[2] = d[o + 2] * a + d[o + 6] * b + d[o2 + 2] * c + d[o2 + 6] * e;
+    return true;
+  }
+
+  // Finds the lens field of view and a small rotation correction for every photo so that the overlapping
+  // parts of neighbouring photos show the same picture. Returns null when there is nothing to align on.
+  async function calibrate(sm, nom, fov0, progress, opt) {
+    opt = opt || {};
+    var K = sm.length, N = 16000, i, k, s, e;
+    function Fof(k, fov) { return Math.max(sm[k].w, sm[k].h) / 2 / Math.tan(fov / 2); }
+    // 1) sample directions that at least two photos see
+    var dirs = [], cs = [0], ci = [], M = 0, ga = Math.PI * (3 - Math.sqrt(5));
+    for (i = 0; i < N; i++) {
+      var z = 1 - 2 * (i + 0.5) / N, rr = Math.sqrt(1 - z * z), th = i * ga, dx = rr * Math.sin(th), dy = rr * Math.cos(th);
+      var list = [];
+      for (k = 0; k < K; k++) {
+        var B = nom[k], zz = dx * B.f[0] + dy * B.f[1] + z * B.f[2];
+        if (zz <= 0.1) continue;
+        var F = Fof(k, fov0);
+        var ix = sm[k].w / 2 + F * (dx * B.r[0] + dy * B.r[1] + z * B.r[2]) / zz, iy = sm[k].h / 2 - F * (dx * B.u[0] + dy * B.u[1] + z * B.u[2]) / zz;
+        if (ix > 6 && iy > 6 && ix < sm[k].w - 7 && iy < sm[k].h - 7) list.push(k);
+      }
+      if (list.length < 2) continue;
+      dirs.push(dx, dy, z); for (e = 0; e < list.length; e++) ci.push(list[e]);
+      cs.push(ci.length); M++;
+    }
+    if (M < 60) return null;
+    var sd = Float64Array.from(dirs), cstart = Int32Array.from(cs), cimg = Int16Array.from(ci), cval = new Float32Array(ci.length);
+    var ls = [], lc = [];
+    for (k = 0; k < K; k++) { ls.push([]); lc.push([]); }
+    for (s = 0; s < M; s++) for (e = cstart[s]; e < cstart[s + 1]; e++) { ls[cimg[e]].push(s); lc[cimg[e]].push(e); }
+    var LS = ls.map(function (a) { return Int32Array.from(a); }), LC = lc.map(function (a) { return Int32Array.from(a); });
+
+    // 2) state: per-photo rotation deltas (deg), current bases, field of view
+    var del = new Float64Array(K * 3), Bs = nom.slice(), fov = fov0, sigma2 = 1, PEN = 1, lvl = 0;
+    function fillImage(k, F) {
+      var B = Bs[k], m = sm[k].lv[lvl], a = LS[k], c = LC[k], t, s2;
+      F = F * m.w / sm[k].w;
+      for (t = 0; t < a.length; t++) { s2 = a[t] * 3; cval[c[t]] = sampleHP(m, B, F, sd[s2], sd[s2 + 1], sd[s2 + 2]); }
+    }
+    function fillAll() { for (var q = 0; q < K; q++) fillImage(q, Fof(q, fov)); }
+    function sampleCost(s) {
+      var a = cstart[s], b = cstart[s + 1], sum = 0, n = 0, bad = 0, v, q;
+      for (q = a; q < b; q++) { v = cval[q]; if (v !== v) bad++; else { sum += v; n++; } }
+      var c = bad * PEN;
+      if (n >= 2) { var mean = sum / n; for (q = a; q < b; q++) { v = cval[q]; if (v === v) c += (v - mean) * (v - mean); } }
+      return c;
+    }
+    function dataCost(k) { var a = LS[k], t, c = 0; for (t = 0; t < a.length; t++) c += sampleCost(a[t]); return c; }
+    function dataTotal() { var c = 0; for (var s2 = 0; s2 < M; s2++) c += sampleCost(s2); return c; }
+    function regOf(k) { var a = del[k * 3], p = del[k * 3 + 1], r = del[k * 3 + 2]; return 0.03 * LS[k].length * sigma2 * (a * a + p * p + r * r) / 100; }
+    function regTotal() { var c = 0; for (var q = 0; q < K; q++) c += regOf(q); return c; }
+
+    function setLevel(l) {
+      lvl = l; fillAll();
+      var sq = 0, nq = 0, q;
+      for (q = 0; q < cval.length; q++) if (cval[q] === cval[q]) { sq += cval[q] * cval[q]; nq++; }
+      sigma2 = nq ? sq / nq : 0; PEN = 1.2 * sigma2;
+      return nq;
+    }
+    var LAST = sm[0].lv.length - 1;
+    if (setLevel(LAST) < 200) return null;
+    if (Math.sqrt(sigma2) < 0.02) return { flat: true };   // no texture to align on (blank wall, sky...)
+    var cost0 = dataTotal();
+
+    function setPose(k, a, p, r) {
+      del[k * 3] = a; del[k * 3 + 1] = p; del[k * 3 + 2] = r;
+      Bs[k] = tweak(nom[k], a, p, r);
+      fillImage(k, Fof(k, fov));
+    }
+    function refineImage(k, steps) {
+      var d = [del[k * 3], del[k * 3 + 1], del[k * 3 + 2]], best = dataCost(k) + regOf(k), si, it, j, sg, improved, LIM = 15;
+      for (si = 0; si < steps.length; si++) {
+        for (it = 0; it < 6; it++) {
+          improved = false;
+          for (j = 0; j < 3; j++) for (sg = -1; sg <= 1; sg += 2) {
+            var t = d.slice(); t[j] += sg * steps[si];
+            if (Math.abs(t[j]) > LIM) continue;
+            setPose(k, t[0], t[1], t[2]);
+            var c = dataCost(k) + regOf(k);
+            if (c < best - 1e-9) { best = c; d = t; improved = true; }
+          }
+          setPose(k, d[0], d[1], d[2]);
+          if (!improved) break;
+        }
+      }
+    }
+    async function sweep(steps, label) {
+      for (var q = 0; q < K; q++) {
+        refineImage(q, steps);
+        if (q % 3 === 2) { progress(label, q / K); await tick(); }
+      }
+    }
+    // repeat sweeps until the total mismatch stops improving (neighbouring photos pull on each other)
+    async function converge(steps, label, maxIter) {
+      var prev = dataTotal() + regTotal(), it, cur;
+      for (it = 0; it < maxIter; it++) {
+        await sweep(steps, label);
+        cur = dataTotal() + regTotal();
+        if (prev - cur < 0.01 * prev) break;
+        prev = cur;
+      }
+    }
+    function searchFov(lo, hi, n) {
+      var bestF = fov, bestC = Infinity, q, f;
+      for (q = 0; q < n; q++) {
+        f = lo + (hi - lo) * q / (n - 1); fov = f; fillAll();
+        var c = dataTotal();
+        if (c < bestC) { bestC = c; bestF = f; }
+      }
+      fov = bestF; fillAll();
+    }
+    function fixedFov(v) { return clamp(v, 35 * D2R, 110 * D2R); }
+
+    progress("向きを確認中", 0); await tick();
+    // alternate between "which field of view fits" and "where does each photo belong", coarse to fine
+    // Poses and field of view are tangled: a wrong view angle makes every photo look misplaced. So for each
+    // candidate view angle the photos are re-aligned, and the angle that leaves the least mismatch wins.
+    // This runs from blurry to sharp so that photos several degrees off can still find their place.
+    function resetPoses() { for (var q = 0; q < K * 3; q++) del[q] = 0; for (var q2 = 0; q2 < K; q2++) Bs[q2] = nom[q2]; }
+    var stageNo = 0, stageTotal = 6;
+    async function profile(cands, steps, it, warm) {
+      var best = null, c, i2;
+      stageNo++;
+      for (i2 = 0; i2 < cands.length; i2++) {
+        fov = fixedFov(cands[i2]);
+        if (!warm) resetPoses();
+        else if (best) { del.set(best.del); Bs = best.Bs.slice(); }
+        else if (profile.start) { del.set(profile.start.del); Bs = profile.start.Bs.slice(); }
+        fillAll();
+        await converge(steps, "向きと画角を補正中 (" + stageNo + "/" + stageTotal + ")", it);
+        c = dataTotal() + regTotal();
+        if (!best || c < best.c) best = { c: c, f: fov, del: Float64Array.from(del), Bs: Bs.slice() };
+        else if (warm) { /* keep best as the warm start */ }
+      }
+      fov = best.f; del.set(best.del); Bs = best.Bs.slice(); fillAll();
+      profile.start = { del: Float64Array.from(del), Bs: Bs.slice() };
+    }
+    function around(f, rel, n) { var a2 = [], q; for (q = 0; q < n; q++) a2.push(f * (1 - rel + 2 * rel * q / (n - 1))); return a2; }
+    setLevel(0); await profile(around(fov0, 0.18, 11), [8, 4, 2], 4, false);
+    setLevel(1); await profile(around(fov, 0.06, 5), [4, 2, 1], 5, true);
+    setLevel(2); await profile(around(fov, 0.04, 5), [2, 1, 0.5], 5, true);
+    setLevel(3); await profile(around(fov, 0.02, 3), [1, 0.5, 0.25], 6, true);
+    // a photo that is still clearly worse than the rest (stuck in a wrong spot): search around it more widely
+    async function rescue() {
+      var cs2 = [], q, order, med, bad = 0;
+      setLevel(1);
+      for (q = 0; q < K; q++) cs2.push(dataCost(q) / Math.max(1, LS[q].length));
+      order = cs2.slice().sort(function (a2, b2) { return a2 - b2; }); med = order[Math.floor(K / 2)];
+      for (q = 0; q < K; q++) {
+        bad++;
+        var bc = dataCost(q) + regOf(q), bd = [del[q * 3], del[q * 3 + 1], del[q * 3 + 2]], ga, gp, gr, base = bd.slice();
+        for (ga = -10; ga <= 10; ga += 5) for (gp = -10; gp <= 10; gp += 5) for (gr = -10; gr <= 10; gr += 5) {
+          setPose(q, base[0] + ga, base[1] + gp, base[2] + gr);
+          var cc = dataCost(q) + regOf(q);
+          if (cc < bc) { bc = cc; bd = [base[0] + ga, base[1] + gp, base[2] + gr]; }
+        }
+        setPose(q, bd[0], bd[1], bd[2]);
+        refineImage(q, [2, 1, 0.5]);
+        if (bad % 3 === 0) await tick();
+      }
+      return bad;
+    }
+    if (await rescue()) { await converge([2, 1, 0.5], "向きと画角を補正中 (6/6)", 4); setLevel(3); await converge([0.5, 0.25, 0.12], "向きと画角を補正中 (6/6)", 5); }
+    await profile(around(fov, 0.01, 3), [0.5, 0.25, 0.12], 8, true);
+    await converge([0.25, 0.12], "向きと画角を補正中 (6/6)", 6);
+    var cost1 = dataTotal();
+
+    var rotSum = 0; for (k = 0; k < K; k++) rotSum += Math.hypot(del[k * 3], del[k * 3 + 1], del[k * 3 + 2]);
+    var res = { fov: fov, bases: Bs.slice(), cost0: cost0, cost1: cost1, gain: 1 - cost1 / cost0, rotAvg: rotSum / K, dirs: sd, cstart: cstart, cimg: cimg, M: M, K: K };
+    if (!(cost1 < cost0)) { res.fov = fov0; res.bases = nom.slice(); res.gain = 0; res.rotAvg = 0; }
+    return res;
+  }
+
+  // Brown-Lowe style gain compensation: one gain per photo and colour channel so the overlaps match in brightness
+  function solveGains(sm, cal) {
+    var K = sm.length, N = new Float64Array(K * K), S = new Float64Array(K * K * 3), col = [], q, s, e, a, b, c;
+    for (q = 0; q < 6; q++) col.push([0, 0, 0]);
+    var tmp = [0, 0, 0], ok = [], ids = [];
+    for (s = 0; s < cal.M; s++) {
+      ok.length = 0; ids.length = 0;
+      for (e = cal.cstart[s]; e < cal.cstart[s + 1]; e++) {
+        var k = cal.cimg[e], F = Math.max(sm[k].w, sm[k].h) / 2 / Math.tan(cal.fov / 2);
+        if (!sampleRGB(sm[k], cal.bases[k], F, cal.dirs[s * 3], cal.dirs[s * 3 + 1], cal.dirs[s * 3 + 2], tmp)) continue;
+        var lum = 0.299 * tmp[0] + 0.587 * tmp[1] + 0.114 * tmp[2];
+        if (lum > 245 || lum < 8) continue;
+        ok.push([tmp[0], tmp[1], tmp[2]]); ids.push(k);
+      }
+      for (a = 0; a < ids.length; a++) for (b = 0; b < ids.length; b++) {
+        if (a === b) continue;
+        var ix = ids[a] * K + ids[b]; N[ix]++;
+        S[ix * 3] += ok[a][0]; S[ix * 3 + 1] += ok[a][1]; S[ix * 3 + 2] += ok[a][2];
+      }
+    }
+    var gains = new Float64Array(K * 3), sN2 = 100, sG2 = 0.01;
+    for (c = 0; c < 3; c++) {
+      var A = [], rhs = [], i, j;
+      for (i = 0; i < K; i++) { A.push(new Float64Array(K)); rhs.push(0); }
+      for (i = 0; i < K; i++) {
+        var tot = 0;
+        for (j = 0; j < K; j++) {
+          var n = N[i * K + j]; if (i === j || n < 20) continue;
+          var Iij = S[(i * K + j) * 3 + c] / n, Iji = S[(j * K + i) * 3 + c] / n;
+          tot += n; A[i][i] += n * Iij * Iij / sN2; A[i][j] -= n * Iij * Iji / sN2;
+        }
+        if (tot === 0) { A[i][i] = 1; rhs[i] = 1; } else { A[i][i] += tot / sG2; rhs[i] = tot / sG2; }
+      }
+      // Gaussian elimination (K is small)
+      for (i = 0; i < K; i++) {
+        var piv = i; for (j = i + 1; j < K; j++) if (Math.abs(A[j][i]) > Math.abs(A[piv][i])) piv = j;
+        var t2 = A[i]; A[i] = A[piv]; A[piv] = t2; var t3 = rhs[i]; rhs[i] = rhs[piv]; rhs[piv] = t3;
+        var d = A[i][i] || 1e-9;
+        for (j = i + 1; j < K; j++) {
+          var f = A[j][i] / d; if (!f) continue;
+          for (var m = i; m < K; m++) A[j][m] -= f * A[i][m];
+          rhs[j] -= f * rhs[i];
+        }
+      }
+      var g = new Float64Array(K);
+      for (i = K - 1; i >= 0; i--) { var sm2 = rhs[i]; for (j = i + 1; j < K; j++) sm2 -= A[i][j] * g[j]; g[i] = sm2 / (A[i][i] || 1e-9); }
+      for (i = 0; i < K; i++) gains[i * 3 + c] = clamp(g[i], 0.6, 1.6);
+    }
+    return gains;
+  }
+
+  function stitchError(err) {
+    busy = false; $("prog").hidden = true; $("progTxt").hidden = true; renderCapture();
+    say("合成に失敗しました。「詳しい設定」で出力サイズを標準にして、もう一度お試しください。", true);
+    if (window.console) console.error(err);
+  }
+  function showProgress(txt, frac) {
+    $("prog").hidden = false; $("progTxt").hidden = false;
+    $("progBar").style.width = Math.round(frac * 100) + "%"; $("progTxt").textContent = txt;
+  }
+
+  async function stitch() {
+    var idx = [];
+    shots.forEach(function (s, i) { if (s) idx.push(i); });
+    if (idx.length < 2 || busy) return;
+    busy = true; renderCapture(); $("report").hidden = true;
+    var W = Math.min(+$("res").value, Math.max(2048, maxTex)), H = W / 2;
+    var K = idx.length, fov0 = +$("fov").value * D2R, noteParts = [], fovUsed = fov0;
+    var nom = idx.map(function (si) { return shots[si].basis || basis(targets[si].yaw * D2R, targets[si].pitch * D2R); });
+    var bases = nom, gains = null, cal = null;
+
+    if ($("autoFix").checked) {
+      showProgress("写真を解析中…", 0); await tick();
+      var sm = idx.map(function (si) { return makeSmall(shots[si].canvas); });
+      cal = await calibrate(sm, nom, fov0, function (t, f) { showProgress(t, f); });
+      if (cal && cal.flat) { noteParts.push("模様の少ない場面のため、向きの補正はしていません。"); cal = null; }
+      else if (!cal) noteParts.push("写真どうしの重なりが少ないため、向きの補正はできませんでした。撮影位置を増やすと改善します。");
+      else {
+        bases = cal.bases; fovUsed = cal.fov;
+        showProgress("明るさを揃えています…", 0.98); await tick();
+        gains = solveGains(sm, cal);
+        if (cal.gain > 0.02) noteParts.push("レンズの画角を" + Math.round(fov0 / D2R) + "°→" + (fovUsed / D2R).toFixed(1) + "°に、写真" + K + "枚の向きを平均" + cal.rotAvg.toFixed(1) + "°補正し、つなぎ目のずれを" + Math.round(cal.gain * 100) + "%減らしました。");
+        else noteParts.push("向きの補正で改善できなかったため、撮影時の向きのまま合成しました。");
+        noteParts.push("写真ごとの明るさと色味も揃えました。");
+        if (cal.gain > 0.3) { try { localStorage.setItem("sc.fov", String(Math.round(fovUsed / D2R * 10) / 10)); } catch (e) {} }
+      }
+    } else noteParts.push("自動補正はオフです(撮影時の向きのまま合成)。");
+
+    var DATA = [], CW = new Float64Array(K), CH = new Float64Array(K), CF = new Float64Array(K), CL = new Float64Array(K);
+    var FX = new Float64Array(K), FY = new Float64Array(K), FZ = new Float64Array(K);
+    var RX = new Float64Array(K), RY = new Float64Array(K), RZ = new Float64Array(K);
+    var UX = new Float64Array(K), UY = new Float64Array(K), UZ = new Float64Array(K);
+    var GR = new Float64Array(K).fill(1), GG = new Float64Array(K).fill(1), GB = new Float64Array(K).fill(1);
+    idx.forEach(function (si, k) {
+      var cv = shots[si].canvas, w = cv.width, h = cv.height, b = bases[k];
+      DATA.push(cv.getContext("2d").getImageData(0, 0, w, h).data);
+      var f = (Math.max(w, h) / 2) / Math.tan(fovUsed / 2);
+      CW[k] = w; CH[k] = h; CF[k] = f;
+      CL[k] = Math.cos(Math.min(Math.atan(Math.hypot(w, h) / 2 / f), 1.5));
+      FX[k] = b.f[0]; FY[k] = b.f[1]; FZ[k] = b.f[2];
+      RX[k] = b.r[0]; RY[k] = b.r[1]; RZ[k] = b.r[2];
+      UX[k] = b.u[0]; UY[k] = b.u[1]; UZ[k] = b.u[2];
+      if (gains) { GR[k] = gains[k * 3]; GG[k] = gains[k * 3 + 1]; GB[k] = gains[k * 3 + 2]; }
+    });
+    var sinT = new Float64Array(W), cosT = new Float64Array(W);
+    for (var x0 = 0; x0 < W; x0++) { var th = ((x0 + 0.5) / W - 0.5) * 2 * Math.PI; sinT[x0] = Math.sin(th); cosT[x0] = Math.cos(th); }
+    var out = new Uint8ClampedArray(W * H * 4), mask = new Uint8Array(W * H);
+    var rowSum = new Float64Array(H * 3), rowCnt = new Uint32Array(H);
+    var t0 = performance.now();
+    for (var y = 0; y < H; y++) {
+      var phi = (0.5 - (y + 0.5) / H) * Math.PI, sp = Math.sin(phi), cph = Math.cos(phi);
+      var s0 = 0, s1 = 0, s2 = 0, rc = 0;
+      for (var x = 0; x < W; x++) {
+        var dx = cph * sinT[x], dy = cph * cosT[x], dz = sp;
+        var wr = 0, wg = 0, wb = 0, ws = 0;
+        for (var k = 0; k < K; k++) {
+          var z = dx * FX[k] + dy * FY[k] + dz * FZ[k];
+          if (z < CL[k]) continue;
+          var w = CW[k], h = CH[k];
+          var ix = w * 0.5 + CF[k] * (dx * RX[k] + dy * RY[k] + dz * RZ[k]) / z;
+          var iy = h * 0.5 - CF[k] * (dx * UX[k] + dy * UY[k] + dz * UZ[k]) / z;
+          if (ix < 0 || iy < 0 || ix >= w - 1 || iy >= h - 1) continue;
+          var q = Math.min(Math.min(ix, w - 1 - ix) / (w * 0.5), Math.min(iy, h - 1 - iy) / (h * 0.5)) * 2.2;
+          if (q > 1) q = 1;
+          var wt = q * q * (3 - 2 * q); wt = wt * wt + 0.0005;   // favour each photo's centre: narrower, cleaner seams
+          var px = ix | 0, py = iy | 0, fx = ix - px, fy = iy - py, dat = DATA[k];
+          var o = (py * w + px) * 4, o2 = o + w * 4;
+          var a00 = (1 - fx) * (1 - fy), a10 = fx * (1 - fy), a01 = (1 - fx) * fy, a11 = fx * fy;
+          wr += (dat[o] * a00 + dat[o + 4] * a10 + dat[o2] * a01 + dat[o2 + 4] * a11) * wt * GR[k];
+          wg += (dat[o + 1] * a00 + dat[o + 5] * a10 + dat[o2 + 1] * a01 + dat[o2 + 5] * a11) * wt * GG[k];
+          wb += (dat[o + 2] * a00 + dat[o + 6] * a10 + dat[o2 + 2] * a01 + dat[o2 + 6] * a11) * wt * GB[k];
+          ws += wt;
+        }
+        if (ws > 0) {
+          var oo = (y * W + x) * 4, r8 = wr / ws, g8 = wg / ws, b8 = wb / ws;
+          out[oo] = r8; out[oo + 1] = g8; out[oo + 2] = b8; out[oo + 3] = 255;
+          mask[y * W + x] = 1; s0 += r8; s1 += g8; s2 += b8; rc++;
+        }
+      }
+      rowSum[y * 3] = s0; rowSum[y * 3 + 1] = s1; rowSum[y * 3 + 2] = s2; rowCnt[y] = rc;
+      if (y % 8 === 7 || y === H - 1) {
+        showProgress("合成中 " + Math.round((y + 1) / H * 100) + "%(" + K + "枚)", (y + 1) / H);
+        if (performance.now() - t0 > 12) { await tick(); t0 = performance.now(); }
+      }
+    }
+    // fill uncovered pixels with the nearest covered row's average colour
+    var srcRow = new Int32Array(H).fill(-1), yy, covered = 0;
+    for (yy = 0; yy < H; yy++) {
+      if (rowCnt[yy] > 0) { srcRow[yy] = yy; continue; }
+      for (var dd = 1; dd < H; dd++) {
+        if (yy - dd >= 0 && rowCnt[yy - dd] > 0) { srcRow[yy] = yy - dd; break; }
+        if (yy + dd < H && rowCnt[yy + dd] > 0) { srcRow[yy] = yy + dd; break; }
+      }
+    }
+    for (var fy2 = 0; fy2 < H; fy2++) {
+      var sr = srcRow[fy2], ar, ag, ab;
+      if (sr < 0) { ar = 34; ag = 38; ab = 44; }
+      else { ar = rowSum[sr * 3] / rowCnt[sr]; ag = rowSum[sr * 3 + 1] / rowCnt[sr]; ab = rowSum[sr * 3 + 2] / rowCnt[sr]; }
+      for (var fx2 = 0; fx2 < W; fx2++) {
+        if (mask[fy2 * W + fx2]) { covered++; continue; }
+        var p4 = (fy2 * W + fx2) * 4;
+        out[p4] = ar; out[p4 + 1] = ag; out[p4 + 2] = ab; out[p4 + 3] = 255;
+      }
+    }
+    var cover = covered / (W * H);
+    var oc = document.createElement("canvas"); oc.width = W; oc.height = H;
+    oc.getContext("2d").putImageData(new ImageData(out, W, H), 0, 0);
+    usePano(oc, "合成画像");
+    S.yaw = 0; S.pitch = 0;
+    $("prog").hidden = true; $("progTxt").hidden = true; $("progBar").style.width = "0";
+    busy = false; renderCapture(); setStep(3);
+    if (cover < 0.97) noteParts.push("写真が届いていない範囲(全体の" + Math.round((1 - cover) * 100) + "%)は、周りの色で埋めています。");
+    $("reportTxt").textContent = noteParts.join(" ");
+    $("report").hidden = false;
+    if (cal && cal.gain > 0.3) {
+      $("fov").value = String(clamp(Math.round(fovUsed / D2R), 45, 100)); $("fovOut").textContent = $("fov").value + "°";
+    }
+    window.__last = { canvas: oc, cal: cal && cal.fov ? { fov: cal.fov / D2R, gain: cal.gain, rotAvg: cal.rotAvg, cost0: cal.cost0, cost1: cal.cost1 } : null, cover: cover, gains: gains };
+    say("つなぎ合わせました。上のビューアでぐるっと見回せます。よければ「JPEGで保存」を押してください。", false);
+    stage.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  $("btnStitch").addEventListener("click", function () { stitch().catch(stitchError); });
+
+  /* ================= Live capture (camera + gyro) ================= */
+  var L = { on: false, stream: null, have: false, f: null, r: null, u: null, off: 0, hold: 0, lastF: null, lastT: 0, raf: 0, wake: null, hist: [], armed: true, hint: "" };
+  var lv = $("lv"), lc = $("lc"), lctx = lc.getContext("2d");
+  function vnorm(a) { var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+  function vmix(o, n, k) { return vnorm([o[0] + (n[0] - o[0]) * k, o[1] + (n[1] - o[1]) * k, o[2] + (n[2] - o[2]) * k]); }
+  function dirOf(yaw, pitch) { var cp = Math.cos(pitch); return [cp * Math.sin(yaw), cp * Math.cos(yaw), Math.sin(pitch)]; }
+  function rotZ(v, a) { var c = Math.cos(a), s = Math.sin(a); return [v[0] * c - v[1] * s, v[0] * s + v[1] * c, v[2]]; }
+  function screenAngle() {
+    var a = (screen.orientation && typeof screen.orientation.angle === "number") ? screen.orientation.angle : (window.orientation || 0);
+    return a * D2R;
+  }
+  function onOri(e) {
+    if (e.alpha == null || e.beta == null || e.gamma == null) return;
+    var a = e.alpha * D2R, b = e.beta * D2R, g = e.gamma * D2R;
+    var ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), cg = Math.cos(g), sg = Math.sin(g);
+    var X = [ca * cg - sa * sb * sg, sa * cg + ca * sb * sg, -cb * sg];
+    var Y = [-sa * cb, ca * cb, sb];
+    var Z = [ca * sg + sa * sb * cg, sa * sg - ca * sb * cg, cb * cg];
+    var th = screenAngle(), st = Math.sin(th), ct = Math.cos(th);
+    var f = [-Z[0], -Z[1], -Z[2]];
+    var u = [st * X[0] + ct * Y[0], st * X[1] + ct * Y[1], st * X[2] + ct * Y[2]];
+    var r = [ct * X[0] - st * Y[0], ct * X[1] - st * Y[1], ct * X[2] - st * Y[2]];
+    if (!L.have) { L.f = f; L.r = r; L.u = u; L.have = true; }
+    else { L.f = vmix(L.f, f, 0.4); L.r = vmix(L.r, r, 0.4); L.u = vmix(L.u, u, 0.4); }
+    var now = performance.now();
+    L.hist.push({ t: now, f: f, r: r, u: u });
+    while (L.hist.length && now - L.hist[0].t > 600) L.hist.shift();
+  }
+  function curBasis() { return { f: rotZ(L.f, L.off), r: rotZ(L.r, L.off), u: rotZ(L.u, L.off) }; }
+  // average of the last ~0.3 s of raw sensor readings: removes jitter so the saved pose is as exact as possible
+  function avgBasis() {
+    var now = performance.now(), n = 0, f = [0, 0, 0], r = [0, 0, 0], i, h;
+    for (i = 0; i < L.hist.length; i++) {
+      h = L.hist[i]; if (now - h.t > 300) continue;
+      n++; for (var c = 0; c < 3; c++) { f[c] += h.f[c]; r[c] += h.r[c]; }
+    }
+    if (n < 3) return curBasis();
+    f = vnorm(f); var d = vdot(r, f); r = vnorm([r[0] - d * f[0], r[1] - d * f[1], r[2] - d * f[2]]);
+    var u = vcross(r, f);
+    return { f: rotZ(f, L.off), r: rotZ(r, L.off), u: rotZ(u, L.off) };
+  }
+  function recenter() {
+    if (!L.have) return;
+    L.off = Math.atan2(L.f[0], L.f[1]) - targets[active].yaw * D2R;
+    L.hold = 0; L.armed = true; L.hint = ""; liveText();
+  }
+  function liveText() {
+    var n = count();
+    $("liveTitle").textContent = "#" + (active + 1) + " " + labelOf(targets[active]);
+    $("liveSub").textContent = n + " / " + targets.length + " 枚撮影";
+    $("liveBar").style.width = (n / targets.length * 100) + "%";
+    $("liveTip").textContent = L.armed ? "その場で体ごと回り、黄色い輪に画面中央の丸を重ねて、1秒ほど止めてください。" :
+      "続きから撮影します。#" + (active + 1) + " の方向にスマホを向けてから、下の「いまの向きを合わせる」を押してください。";
+  }
+  function setHint(t) { if (t !== L.hint) { L.hint = t; $("liveHint").textContent = t; } }
+
+  async function startLive() {
+    if (busy) return;
+    try {
+      if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+        var p = await DeviceOrientationEvent.requestPermission();
+        if (p !== "granted") throw new Error("motion");
+      }
+    } catch (e) { say("モーションセンサーの許可が必要です。表示された確認で「許可」を選んでから、もう一度押してください。", true); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { say("このブラウザではカメラを使えません。下の「この位置を1枚撮る」で1枚ずつ撮影してください。", true); return; }
+    try {
+      L.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+    } catch (e) { say("カメラを使えませんでした。ブラウザのカメラ許可(アドレスバーの鍵マーク)を確認してください。", true); return; }
+    lv.srcObject = L.stream;
+    try { await lv.play(); } catch (e) {}
+    if (lv.videoWidth) setAspect(lv.videoWidth, lv.videoHeight);
+    L.have = false; L.hold = 0; L.lastF = null; L.lastT = 0; L.on = true; L.hist = []; L.hint = "";
+    window.addEventListener("deviceorientation", onOri);
+    $("live").hidden = false;
+    try { if (navigator.wakeLock) L.wake = await navigator.wakeLock.request("screen"); } catch (e) {}
+    var firstFresh = count() === 0, waited = 0;
+    L.armed = firstFresh; liveText();
+    (function wait() {
+      if (!L.on) return;
+      if (L.have) { if (firstFresh) recenter(); L.lastT = 0; liveText(); loop(performance.now()); return; }
+      waited += 100;
+      if (waited > 2500) { closeLive(); say("この端末ではジャイロ(向きのセンサー)を使えません。下の「この位置を1枚撮る」で1枚ずつ撮影してください。", true); return; }
+      setTimeout(wait, 100);
+    })();
+  }
+  function closeLive() {
+    L.on = false;
+    if (L.raf) cancelAnimationFrame(L.raf); L.raf = 0;
+    window.removeEventListener("deviceorientation", onOri);
+    if (L.stream) L.stream.getTracks().forEach(function (t) { t.stop(); });
+    L.stream = null; lv.srcObject = null;
+    if (L.wake) { try { L.wake.release(); } catch (e) {} L.wake = null; }
+    $("live").hidden = true;
+    renderCapture();
+  }
+  function liveShoot() {
+    if (!L.on || !L.have || !lv.videoWidth) return;
+    var w = lv.videoWidth, h = lv.videoHeight, k = Math.min(1, 1280 / Math.max(w, h));
+    var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext("2d").drawImage(lv, 0, 0, c.width, c.height);
+    var idx = active;
+    shots[idx] = shotFromCanvas(c, avgBasis());
+    var fl = $("flash"); fl.classList.remove("go"); void fl.offsetWidth; fl.classList.add("go");
+    if (navigator.vibrate) navigator.vibrate(30);
+    L.hold = 0;
+    active = nextEmpty(idx + 1);
+    renderCapture();
+    if (count() === targets.length) {
+      closeLive();
+      say("全ての位置を撮影しました。向きと明るさを補正してつなぎ合わせています…", false);
+      stitch().catch(stitchError);
+      return;
+    }
+    liveText();
+  }
+  function loop(t) {
+    if (!L.on) return;
+    L.raf = requestAnimationFrame(loop);
+    var dt = L.lastT ? Math.min(0.1, (t - L.lastT) / 1000) : 0.016;
+    L.lastT = t;
+    var b = curBasis(), f = b.f;
+    var tv = dirOf(targets[active].yaw * D2R, targets[active].pitch * D2R);
+    var err = Math.acos(clamp(vdot(f, tv), -1, 1)) / D2R;
+    var speed = L.lastF ? Math.acos(clamp(vdot(f, L.lastF), -1, 1)) / D2R / dt : 99;
+    L.lastF = f;
+    var need = 0.7, aligned = err < 3, steady = speed < 10;
+    if (L.armed && $("liveAuto").checked && aligned && steady && L.hist.length > 4) L.hold += dt; else L.hold = Math.max(0, L.hold - dt * 2);
+    if (L.hold >= need) { liveShoot(); return; }
+
+    // words: which way to turn
+    var tr = vdot(tv, b.r), tu = vdot(tv, b.u), tf = vdot(tv, f);
+    var dxd = Math.atan2(tr, tf) / D2R, dyd = Math.atan2(tu, Math.hypot(tf, tr)) / D2R;
+    if (!L.armed) setHint("向きを合わせてください");
+    else if (aligned) setHint(steady ? "そのまま止めて…" : "ぴったり! ゆっくり止めてください");
+    else {
+      var parts = [];
+      if (tf < 0) parts.push("後ろ側です。体ごと" + (dxd >= 0 ? "右" : "左") + "へ回ってください");
+      else {
+        if (Math.abs(dxd) >= 2) parts.push((dxd > 0 ? "右へ " : "左へ ") + Math.round(Math.abs(dxd)) + "°");
+        if (Math.abs(dyd) >= 2) parts.push((dyd > 0 ? "上へ " : "下へ ") + Math.round(Math.abs(dyd)) + "°");
+      }
+      setHint(parts.join("   "));
+    }
+
+    // overlay
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var W = Math.round(lc.clientWidth * dpr), H = Math.round(lc.clientHeight * dpr);
+    if (lc.width !== W || lc.height !== H) { lc.width = W; lc.height = H; }
+    lctx.clearRect(0, 0, W, H);
+    var vw = lv.videoWidth || W, vh = lv.videoHeight || H, sc = Math.max(W / vw, H / vh);
+    var half = Math.max(vw, vh) * sc / 2, F = half / Math.tan(+$("fov").value * D2R / 2);
+    var cx = W / 2, cy = H / 2, u = dpr;
+    lctx.lineWidth = 2 * u;
+    targets.forEach(function (tg, i) {
+      var d = dirOf(tg.yaw * D2R, tg.pitch * D2R), zc = vdot(d, f);
+      if (zc < 0.05) return;
+      var x = cx + F * vdot(d, b.r) / zc, y = cy - F * vdot(d, b.u) / zc;
+      if (x < -30 || y < -30 || x > W + 30 || y > H + 30) return;
+      lctx.beginPath(); lctx.arc(x, y, (i === active ? 11 : 8) * u, 0, 7);
+      if (shots[i]) { lctx.fillStyle = "rgba(108,195,224,.85)"; lctx.fill(); }
+      else { lctx.strokeStyle = "rgba(255,255,255,.55)"; lctx.stroke(); }
+      if (i === active) {
+        lctx.strokeStyle = "#f2c14e"; lctx.lineWidth = 3 * u;
+        lctx.beginPath(); lctx.arc(x, y, 24 * u, 0, 7); lctx.stroke();
+        if (L.hold > 0) { lctx.lineWidth = 6 * u; lctx.strokeStyle = "#7bf0a0"; lctx.beginPath(); lctx.arc(x, y, 24 * u, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, L.hold / need)); lctx.stroke(); }
+        lctx.lineWidth = 2 * u;
+      }
+    });
+    // arrow toward the active target when it is off screen
+    var ax = tr, ay = -tu, al = Math.hypot(ax, ay) || 1;
+    var tx = cx + F * tr / Math.max(tf, 0.05), ty = cy - F * tu / Math.max(tf, 0.05);
+    var off = tf < 0.2 || tx < 0 || ty < 0 || tx > W || ty > H;
+    if (off && L.armed) {
+      var rr = Math.min(W, H) * 0.34, ang = Math.atan2(ay / al, ax / al);
+      lctx.save(); lctx.translate(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr); lctx.rotate(ang);
+      lctx.fillStyle = "#f2c14e"; lctx.beginPath(); lctx.moveTo(18 * u, 0); lctx.lineTo(-10 * u, -13 * u); lctx.lineTo(-10 * u, 13 * u); lctx.closePath(); lctx.fill();
+      lctx.restore();
+    }
+    lctx.strokeStyle = aligned && L.armed ? "#7bf0a0" : "rgba(255,255,255,.9)"; lctx.lineWidth = 2 * u;
+    lctx.beginPath(); lctx.arc(cx, cy, 14 * u, 0, 7); lctx.stroke();
+    lctx.beginPath(); lctx.moveTo(cx - 6 * u, cy); lctx.lineTo(cx + 6 * u, cy); lctx.moveTo(cx, cy - 6 * u); lctx.lineTo(cx, cy + 6 * u); lctx.stroke();
+  }
+  $("btnLive").addEventListener("click", startLive);
+  $("liveClose").addEventListener("click", function () { closeLive(); say(count() ? count() + " 枚撮影済みです。続きを撮るか、「つなぎ合わせる」を押してください。" : "", false); });
+  $("liveShutter").addEventListener("click", function () { if (!L.armed) recenter(); liveShoot(); });
+  $("liveRecenter").addEventListener("click", recenter);
+  document.addEventListener("visibilitychange", function () { if (document.hidden && L.on) closeLive(); });
+
+  /* ================= PWA: install & offline ================= */
+  var deferred = null;
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; $("btnInstall").hidden = false; });
+  $("btnInstall").addEventListener("click", async function () {
+    if (!deferred) return;
+    deferred.prompt(); try { await deferred.userChoice; } catch (e) {}
+    deferred = null; $("btnInstall").hidden = true;
+  });
+  window.addEventListener("appinstalled", function () { $("btnInstall").hidden = true; });
+  var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone) $("iosHint").hidden = false;
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });
+  }
+
+
+  /* ---------- boot ---------- */
+  try { var sf = localStorage.getItem("sc.fov"); if (sf && +sf >= 45 && +sf <= 100) { $("fov").value = sf; $("fovOut").textContent = Math.round(+sf) + "°"; } } catch (e) {}
+  rebuild("ring", true);
+  usePano(drawSample(), "サンプル");
+  resize();
+  if (/[?&]test\b/.test(location.search)) {
+    window.__sphere = {
+      targets: function () { return targets; }, frameAspect: function () { return frameAspect; },
+      setShots: function (list) { shots = targets.map(function (t, i) { return list[i] ? shotFromCanvas(list[i].canvas, list[i].basis || null) : null; }); renderCapture(); },
+      rebuild: rebuild, setAspect: setAspect, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, stitch: stitch, last: function () { return window.__last; }
+    };
+  }
 })();
 </script>
 </body>
