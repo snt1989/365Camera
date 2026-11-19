@@ -82,6 +82,7 @@ button:focus-visible, select:focus-visible, input[type=range]:focus-visible, .do
 button:disabled { opacity: .45; cursor: not-allowed; }
 button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
 button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.spanrow { display: grid; gap: 6px; font-size: 13px; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .seg button { border: 0; border-radius: 0; background: transparent; }
 .seg button + button { border-left: 1px solid var(--line); }
@@ -204,7 +205,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     </section>
 
     <section class="panel" id="capture">
-      <h2>撮影して全天球にする</h2>
+      <h2>撮影して360°・広角写真をつくる</h2>
       <ol class="steps" aria-label="作業の流れ">
         <li id="st1" class="cur"><b>1</b>撮る</li>
         <li id="st2"><b>2</b>つなぐ</li>
@@ -236,8 +237,17 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       <div class="group">
         <div class="glabel">撮る範囲</div>
         <div class="seg" role="group" aria-label="撮る範囲" id="patSeg">
-          <button type="button" class="on" data-pat="ring">水平に1周(かんたん)</button>
-          <button type="button" data-pat="full">上下も含む(全天球)</button>
+          <button type="button" class="on" data-pat="ring">水平1周</button>
+          <button type="button" data-pat="full">全天球</button>
+          <button type="button" data-pat="wide">広角写真</button>
+        </div>
+        <div class="spanrow" id="spanRow" hidden>
+          <label for="wideSpan">写す広さ</label>
+          <select id="wideSpan">
+            <option value="120">約120°(ふつうの広角レンズ並み)</option>
+            <option value="180" selected>約180°(目の前いっぱい)</option>
+            <option value="270">約270°(ほぼ後ろまで)</option>
+          </select>
         </div>
         <p id="patDesc"></p>
       </div>
@@ -528,7 +538,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   });
 
   /* ---------- panorama source ---------- */
-  var pano = null, panoLabel = "";
+  var pano = null, panoLabel = "", wideSave = null;
   var dlApi = null;
   function usePano(canvas, label) {
     pano = canvas; panoLabel = label;
@@ -611,15 +621,15 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   }
   $("btnSave").addEventListener("click", function () {
     if (!pano || !dlApi) return;
-    var W = pano.width, H = pano.height;
-    pano.toBlob(async function (blob) {
+    var isW = panoLabel === "広角写真" && wideSave, src = isW ? wideSave : pano, W = src.width, H = src.height;
+    src.toBlob(async function (blob) {
       if (!blob) { say("JPEGを作成できませんでした。", true); return; }
       try {
-        var data = addGPano(await blob.arrayBuffer(), W, H);
+        var data = isW ? await blob.arrayBuffer() : addGPano(await blob.arrayBuffer(), W, H);
         var d = new Date(), p2 = function (n) { return (n < 10 ? "0" : "") + n; };
-        var name = "sphere-" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + "-" + p2(d.getHours()) + p2(d.getMinutes()) + ".jpg";
+        var name = (isW ? "wide-" : "sphere-") + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + "-" + p2(d.getHours()) + p2(d.getMinutes()) + ".jpg";
         await dlApi.save({ filename: name, data: new Blob([data], { type: "image/jpeg" }) });
-        say("保存しました。Googleフォトなどで360°写真として開けます。", false);
+        say(isW ? "保存しました。ふつうの横長写真として開けます。" : "保存しました。Googleフォトなどで360°写真として開けます。", false);
       } catch (err) {
         if (err && err.code === "declined") return;
         say("この画面では保存できませんでした。", true);
@@ -736,6 +746,12 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       var n = Math.max(5, Math.ceil(360 * Math.cos(pitch * D2R) / (hf * 0.7)));
       for (var i = 0; i < n; i++) t.push({ yaw: Math.round(((i + offset) * 360 / n) % 360 * 10) / 10, pitch: pitch });
     }
+    if (kind === "wide") {
+      // one row, swept left to right; the total width includes the field of view of the first and last photo
+      var span = Math.max(+$("wideSpan").value, hf * 1.6), step = hf * 0.7, n2 = Math.max(2, Math.ceil((span - hf) / step) + 1);
+      for (var j = 0; j < n2; j++) { var yw = -(span - hf) / 2 + (span - hf) * j / (n2 - 1); t.push({ yaw: Math.round(((yw + 360) % 360) * 10) / 10, pitch: 0 }); }
+      return t;
+    }
     ring(0, 0);
     if (kind === "full") {
       ring(rowGap, 0.5); ring(-rowGap, 0.5);
@@ -758,7 +774,10 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   }
   function describePattern() {
     var n = targets.length, min = Math.max(1, Math.round(n * 5 / 60));
-    $("patDesc").textContent = (pattern === "ring" ? "目の高さで、その場をぐるっと水平に1周します。" : "水平の1周に加えて、上と下も撮ります。") + n + "枚、約" + min + "分で撮れます。";
+    var lead = pattern === "ring" ? "目の高さで、その場をぐるっと水平に1周します。" :
+      pattern === "wide" ? "ふつうのカメラでも大丈夫。左端から右端へ横に振りながら撮り、1枚の横長の広い写真にします(全天球にはなりません)。" :
+      "水平の1周に加えて、上と下も撮ります。";
+    $("patDesc").textContent = lead + n + "枚、約" + min + "分で撮れます。";
   }
   function renderCapture() {
     var small = targets.length > 22, dr = small ? 4.6 : 6;
@@ -795,6 +814,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     pattern = kind; targets = makePattern(kind);
     shots = targets.map(function () { return null; }); active = 0;
     document.querySelectorAll("[data-pat]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-pat") === kind); });
+    $("spanRow").hidden = kind !== "wide";
     describePattern(); renderCapture();
     return true;
   }
@@ -857,6 +877,12 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     clearTimeout(clearTimer); clearTimer = 0; b.textContent = "最初からやり直す";
     rebuild(pattern, true);
     say("撮影した写真を消しました。最初から撮影できます。", false);
+  });
+  var lastSpan = "180";
+  $("wideSpan").addEventListener("change", function () {
+    if (busy) return;
+    if (count() > 0) { this.value = lastSpan; say("撮影済みの写真があります。広さを変えるには、先に「最初からやり直す」を押してください。", true); return; }
+    lastSpan = this.value; rebuild(pattern, true);
   });
   function setLens(mode, quiet) {
     if (mode === $("lens").value) return true;
@@ -1242,13 +1268,36 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       UX[k] = b.u[0]; UY[k] = b.u[1]; UZ[k] = b.u[2];
       if (gains) { GR[k] = gains[k * 3]; GG[k] = gains[k * 3 + 1]; GB[k] = gains[k * 3 + 2]; }
     });
+    var isWide = pattern === "wide", LON0 = -Math.PI, LON1 = Math.PI, LAT1 = Math.PI / 2, LAT0 = -Math.PI / 2;
+    if (isWide) {
+      // output window = bounding box of everything the photos see (plate-carree, like a normal panorama)
+      var mnLon = 9, mxLon = -9, mnLat = 9, mxLat = -9, avgF = 0;
+      idx.forEach(function (si, k) {
+        var b = bases[k], w = CW[k], h = CH[k], t, q; avgF += CF[k] / K;
+        for (t = 0; t <= 24; t++) {
+          var pts = [[t / 24 * w, 0], [t / 24 * w, h], [0, t / 24 * h], [w, t / 24 * h]];
+          for (q = 0; q < 4; q++) {
+            var X = pts[q][0] - w / 2, Y = h / 2 - pts[q][1], rr = Math.hypot(X, Y), d;
+            if (rr < 1e-9) d = b.f; else {
+              var tt = lensInvG(rr / CF[k], lensUsed), sn = Math.sin(tt), cs2 = Math.cos(tt), ux = X / rr, uy = Y / rr;
+              d = [cs2 * b.f[0] + sn * (ux * b.r[0] + uy * b.u[0]), cs2 * b.f[1] + sn * (ux * b.r[1] + uy * b.u[1]), cs2 * b.f[2] + sn * (ux * b.r[2] + uy * b.u[2])];
+            }
+            var lo = Math.atan2(d[0], d[1]), la = Math.asin(clamp(d[2], -1, 1));
+            if (lo < mnLon) mnLon = lo; if (lo > mxLon) mxLon = lo; if (la < mnLat) mnLat = la; if (la > mxLat) mxLat = la;
+          }
+        }
+      });
+      LON0 = mnLon; LON1 = mxLon; LAT0 = mnLat; LAT1 = mxLat;
+      var maxW = +$("res").value >= 4096 ? 6000 : 3600, ppd = Math.min(avgF * D2R * 0.95, maxW / ((LON1 - LON0) / D2R), 4200 / ((LAT1 - LAT0) / D2R));
+      W = Math.max(64, Math.round((LON1 - LON0) / D2R * ppd)); H = Math.max(64, Math.round((LAT1 - LAT0) / D2R * ppd));
+    }
     var sinT = new Float64Array(W), cosT = new Float64Array(W);
-    for (var x0 = 0; x0 < W; x0++) { var th = ((x0 + 0.5) / W - 0.5) * 2 * Math.PI; sinT[x0] = Math.sin(th); cosT[x0] = Math.cos(th); }
+    for (var x0 = 0; x0 < W; x0++) { var th = LON0 + (x0 + 0.5) / W * (LON1 - LON0); sinT[x0] = Math.sin(th); cosT[x0] = Math.cos(th); }
     var out = new Uint8ClampedArray(W * H * 4), mask = new Uint8Array(W * H);
     var rowSum = new Float64Array(H * 3), rowCnt = new Uint32Array(H);
     var t0 = performance.now();
     for (var y = 0; y < H; y++) {
-      var phi = (0.5 - (y + 0.5) / H) * Math.PI, sp = Math.sin(phi), cph = Math.cos(phi);
+      var phi = LAT1 - (y + 0.5) / H * (LAT1 - LAT0), sp = Math.sin(phi), cph = Math.cos(phi);
       var s0 = 0, s1 = 0, s2 = 0, rc = 0;
       for (var x = 0; x < W; x++) {
         var dx = cph * sinT[x], dy = cph * cosT[x], dz = sp;
@@ -1291,40 +1340,72 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
         if (performance.now() - t0 > 12) { await tick(); t0 = performance.now(); }
       }
     }
-    // fill uncovered pixels with the nearest covered row's average colour
-    var srcRow = new Int32Array(H).fill(-1), yy, covered = 0;
-    for (yy = 0; yy < H; yy++) {
-      if (rowCnt[yy] > 0) { srcRow[yy] = yy; continue; }
-      for (var dd = 1; dd < H; dd++) {
-        if (yy - dd >= 0 && rowCnt[yy - dd] > 0) { srcRow[yy] = yy - dd; break; }
-        if (yy + dd < H && rowCnt[yy + dd] > 0) { srcRow[yy] = yy + dd; break; }
+    var wideCanvas = null, wideInfo = null, cover = 1, oc = null;
+    if (isWide) {
+      // crop to the largest clean rectangle (drop ragged, uncovered borders)
+      var X0 = 0, X1 = W, Y0 = 0, Y1 = H, guard = 0;
+      var rowFrac = function (y2) { var c2 = 0; for (var xx = X0; xx < X1; xx++) c2 += mask[y2 * W + xx]; return c2 / (X1 - X0); };
+      var colFrac = function (x2) { var c2 = 0; for (var yy2 = Y0; yy2 < Y1; yy2++) c2 += mask[yy2 * W + x2]; return c2 / (Y1 - Y0); };
+      while (guard++ < 3000 && X1 - X0 > 32 && Y1 - Y0 > 32) {
+        var fT = rowFrac(Y0), fB = rowFrac(Y1 - 1), fL = colFrac(X0), fR = colFrac(X1 - 1), mn = Math.min(fT, fB, fL, fR);
+        if (mn >= 0.985) break;
+        if (mn === fT) Y0 += 2; else if (mn === fB) Y1 -= 2; else if (mn === fL) X0 += 2; else X1 -= 2;
       }
-    }
-    for (var fy2 = 0; fy2 < H; fy2++) {
-      var sr = srcRow[fy2], ar, ag, ab;
-      if (sr < 0) { ar = 34; ag = 38; ab = 44; }
-      else { ar = rowSum[sr * 3] / rowCnt[sr]; ag = rowSum[sr * 3 + 1] / rowCnt[sr]; ab = rowSum[sr * 3 + 2] / rowCnt[sr]; }
-      for (var fx2 = 0; fx2 < W; fx2++) {
-        if (mask[fy2 * W + fx2]) { covered++; continue; }
-        var p4 = (fy2 * W + fx2) * 4;
-        out[p4] = ar; out[p4 + 1] = ag; out[p4 + 2] = ab; out[p4 + 3] = 255;
+      var cw = X1 - X0, ch = Y1 - Y0;
+      for (var py2 = Y0; py2 < Y1; py2++) for (var px2 = X0; px2 < X1; px2++) out[(py2 * W + px2) * 4 + 3] = 255;
+      var wtmp = document.createElement("canvas"); wtmp.width = W; wtmp.height = H;
+      wtmp.getContext("2d").putImageData(new ImageData(out, W, H), 0, 0);
+      wideCanvas = document.createElement("canvas"); wideCanvas.width = cw; wideCanvas.height = ch;
+      wideCanvas.getContext("2d").drawImage(wtmp, X0, Y0, cw, ch, 0, 0, cw, ch);
+      var lonL = LON0 + X0 / W * (LON1 - LON0), lonR = LON0 + X1 / W * (LON1 - LON0), latT = LAT1 - Y0 / H * (LAT1 - LAT0), latB = LAT1 - Y1 / H * (LAT1 - LAT0);
+      wideInfo = { w: cw, h: ch, lonDeg: (lonR - lonL) / D2R, latDeg: (latT - latB) / D2R };
+      // viewer texture: the photo placed at its true angular position on the sphere
+      var VW = maxTex >= 4096 ? 4096 : 2048, VH = VW / 2;
+      oc = document.createElement("canvas"); oc.width = VW; oc.height = VH;
+      var vg = oc.getContext("2d"), gr2 = vg.createLinearGradient(0, 0, 0, VH);
+      gr2.addColorStop(0, "#1c2a38"); gr2.addColorStop(0.5, "#2a3138"); gr2.addColorStop(0.5, "#1a1613"); gr2.addColorStop(1, "#0e0c0a");
+      vg.fillStyle = gr2; vg.fillRect(0, 0, VW, VH);
+      vg.drawImage(wideCanvas, (lonL + Math.PI) / (2 * Math.PI) * VW, (Math.PI / 2 - latT) / Math.PI * VH, (lonR - lonL) / (2 * Math.PI) * VW, (latT - latB) / Math.PI * VH);
+      wideSave = wideCanvas;
+      usePano(oc, "広角写真");
+    } else {
+      wideSave = null;
+      // fill uncovered pixels with the nearest covered row's average colour
+      var srcRow = new Int32Array(H).fill(-1), yy, covered = 0;
+      for (yy = 0; yy < H; yy++) {
+        if (rowCnt[yy] > 0) { srcRow[yy] = yy; continue; }
+        for (var dd = 1; dd < H; dd++) {
+          if (yy - dd >= 0 && rowCnt[yy - dd] > 0) { srcRow[yy] = yy - dd; break; }
+          if (yy + dd < H && rowCnt[yy + dd] > 0) { srcRow[yy] = yy + dd; break; }
+        }
       }
+      for (var fy2 = 0; fy2 < H; fy2++) {
+        var sr = srcRow[fy2], ar, ag, ab;
+        if (sr < 0) { ar = 34; ag = 38; ab = 44; }
+        else { ar = rowSum[sr * 3] / rowCnt[sr]; ag = rowSum[sr * 3 + 1] / rowCnt[sr]; ab = rowSum[sr * 3 + 2] / rowCnt[sr]; }
+        for (var fx2 = 0; fx2 < W; fx2++) {
+          if (mask[fy2 * W + fx2]) { covered++; continue; }
+          var p4 = (fy2 * W + fx2) * 4;
+          out[p4] = ar; out[p4 + 1] = ag; out[p4 + 2] = ab; out[p4 + 3] = 255;
+        }
+      }
+      cover = covered / (W * H);
+      oc = document.createElement("canvas"); oc.width = W; oc.height = H;
+      oc.getContext("2d").putImageData(new ImageData(out, W, H), 0, 0);
+      usePano(oc, "合成画像");
     }
-    var cover = covered / (W * H);
-    var oc = document.createElement("canvas"); oc.width = W; oc.height = H;
-    oc.getContext("2d").putImageData(new ImageData(out, W, H), 0, 0);
-    usePano(oc, "合成画像");
-    S.yaw = 0; S.pitch = 0;
+    S.yaw = isWide ? (lonL + lonR) / 2 : 0; S.pitch = 0;
     $("prog").hidden = true; $("progTxt").hidden = true; $("progBar").style.width = "0";
     busy = false; renderCapture(); setStep(3);
-    if (cover < 0.97) noteParts.push("写真が届いていない範囲(全体の" + Math.round((1 - cover) * 100) + "%)は、周りの色で埋めています。");
+    if (isWide && wideInfo) noteParts.push("横約" + Math.round(wideInfo.lonDeg) + "°×縦約" + Math.round(wideInfo.latDeg) + "°(" + wideInfo.w + "×" + wideInfo.h + "px)の広角写真に仕上げました。");
+    if (!isWide && cover < 0.97) noteParts.push("写真が届いていない範囲(全体の" + Math.round((1 - cover) * 100) + "%)は、周りの色で埋めています。");
     $("reportTxt").textContent = noteParts.join(" ");
     $("report").hidden = false;
     if (cal && cal.gain > 0.3) {
       $("fov").value = String(clamp(Math.round(fovUsed / D2R), 45, 150)); $("fovOut").textContent = $("fov").value + "°";
     }
     window.__last = { canvas: oc, cal: cal && cal.fov ? { fov: cal.fov / D2R, lens: cal.lens, gain: cal.gain, rotAvg: cal.rotAvg, cost0: cal.cost0, cost1: cal.cost1 } : null, cover: cover, gains: gains };
-    say("つなぎ合わせました。上のビューアでぐるっと見回せます。よければ「JPEGで保存」を押してください。", false);
+    say(isWide ? "広角写真ができました。上のビューアで確認できます。よければ「JPEGで保存」を押すと、横長の写真として保存できます。" : "つなぎ合わせました。上のビューアでぐるっと見回せます。よければ「JPEGで保存」を押してください。", false);
     stage.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
   $("btnStitch").addEventListener("click", function () { stitch().catch(stitchError); });
@@ -1583,7 +1664,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     window.__sphere = {
       targets: function () { return targets; }, frameAspect: function () { return frameAspect; },
       setShots: function (list) { shots = targets.map(function (t, i) { return list[i] ? shotFromCanvas(list[i].canvas, list[i].basis || null) : null; }); renderCapture(); },
-      rebuild: rebuild, setAspect: setAspect, setLens: setLens, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, lensG: lensG, stitch: stitch, last: function () { return window.__last; }
+      rebuild: rebuild, setAspect: setAspect, setLens: setLens, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, lensG: lensG, wide: function () { return wideSave ? [wideSave.width, wideSave.height] : null; }, stitch: stitch, last: function () { return window.__last; }
     };
   }
 })();
