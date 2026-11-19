@@ -159,6 +159,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
 .report { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--done); border-radius: 6px; background: rgba(108, 195, 224, .08); font-size: 13px; }
 .report b { color: var(--done); }
 .ltxt { min-width: 0; flex: 1; }
+#liveCam { margin-top: 8px; min-height: 36px; padding: 0 12px; font-size: 12px; }
 .lp { height: 4px; background: rgba(255, 255, 255, .25); border-radius: 2px; margin: 6px 0; overflow: hidden; max-width: 260px; }
 .lp i { display: block; height: 100%; width: 0; background: var(--accent); }
 .ltip { font-size: 12px; line-height: 1.5; color: #e1e8ed; max-width: 340px; }
@@ -223,6 +224,16 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       </details>
 
       <div class="group">
+        <div class="glabel">使うレンズ</div>
+        <div class="seg" role="group" aria-label="使うレンズ">
+          <button type="button" class="on" data-lens="std">標準(1x 広角)</button>
+          <button type="button" data-lens="ultra">超広角(0.5x)</button>
+        </div>
+        <input type="hidden" id="lens" value="std">
+        <p id="lensDesc">ふつうのカメラです。写真1枚で見える範囲は約65°です。</p>
+      </div>
+
+      <div class="group">
         <div class="glabel">撮る範囲</div>
         <div class="seg" role="group" aria-label="撮る範囲" id="patSeg">
           <button type="button" class="on" data-pat="ring">水平に1周(かんたん)</button>
@@ -251,7 +262,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
         <summary>詳しい設定</summary>
         <div class="field">
           <label for="fov">レンズの画角(写真の長い辺)</label><output id="fovOut" for="fov">65°</output>
-          <input type="range" id="fov" min="45" max="100" value="65">
+          <input type="range" id="fov" min="45" max="150" value="65">
           <span class="note">目安です。自動補正をオンにすると、つなぎ合わせる時に実際の画角へ合わせます。</span><span></span>
           <label for="res">出力サイズ</label><span></span>
           <select id="res">
@@ -278,7 +289,8 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   <canvas id="lc"></canvas>
   <div class="flash" id="flash"></div>
   <div class="ltop">
-    <div class="ltxt"><div class="ls" id="liveSub"></div><div class="lt" id="liveTitle"></div><div class="lp"><i id="liveBar"></i></div><div class="ltip" id="liveTip"></div></div>
+    <div class="ltxt"><div class="ls" id="liveSub"></div><div class="lt" id="liveTitle"></div><div class="lp"><i id="liveBar"></i></div><div class="ltip" id="liveTip"></div>
+      <button type="button" id="liveCam" hidden></button></div>
     <button type="button" id="liveClose">閉じる</button>
   </div>
   <div class="lmid" id="liveHint" aria-live="polite"></div>
@@ -696,7 +708,25 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     if (count() === 0) rebuild(pattern, true);
   }
   function fovLong() { return +$("fov").value; }
-  function hfovDeg() { return 2 * Math.atan(Math.tan(fovLong() * D2R / 2) * frameAspect) / D2R; }
+  // Lens model: image radius = F * ((1-a)*tan(theta) + a*theta). a = 0 is an ordinary (rectilinear) lens;
+  // larger a squeezes the edges the way an ultra-wide / fisheye lens does. F is chosen so that the long side's
+  // half-width always corresponds to exactly fov/2, so "fov" and "a" can be estimated independently.
+  function lensG(t, a) { return (1 - a) * Math.tan(t) + a * t; }
+  function lensInvG(v, a) { var lo = 0, hi = 1.55, m, i; for (i = 0; i < 40; i++) { m = (lo + hi) / 2; if (lensG(m, a) < v) lo = m; else hi = m; } return (lo + hi) / 2; }
+  var LX = 0, LY = 0;   // result of lensXY: offset from the picture centre in pixels (y down)
+  function lensXY(B, F, a, dx, dy, dz) {
+    var cz = dx * B.f[0] + dy * B.f[1] + dz * B.f[2];
+    var cx = dx * B.r[0] + dy * B.r[1] + dz * B.r[2], cy = dx * B.u[0] + dy * B.u[1] + dz * B.u[2];
+    if (a === 0) { if (cz <= 0.05) return false; LX = F * cx / cz; LY = -F * cy / cz; return true; }
+    var rho = Math.sqrt(cx * cx + cy * cy), th = Math.atan2(rho, cz);
+    if (th > 1.5) return false;
+    if (rho < 1e-9) { LX = 0; LY = 0; return true; }
+    var k = F * ((1 - a) * Math.tan(th) + a * th) / rho; LX = cx * k; LY = -cy * k; return true;
+  }
+  var curLensA = 0.25;
+  function lensMode() { return $("lens").value; }
+  function lensA() { return lensMode() === "ultra" ? curLensA : 0; }
+  function hfovDeg() { var a = lensA(); return 2 * lensInvG(lensG(fovLong() * D2R / 2, a) * frameAspect, a) / D2R; }
 
   // Rings are spaced so that neighbouring photos overlap by about 30%.
   function makePattern(kind) {
@@ -828,6 +858,22 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     rebuild(pattern, true);
     say("撮影した写真を消しました。最初から撮影できます。", false);
   });
+  function setLens(mode, quiet) {
+    if (mode === $("lens").value) return true;
+    if (count() > 0) { if (!quiet) say("撮影済みの写真があります。レンズを変えるには、先に「最初からやり直す」を押してください。", true); return false; }
+    $("lens").value = mode;
+    document.querySelectorAll("[data-lens]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-lens") === mode); });
+    var f = $("fov"), want = mode === "ultra" ? 105 : 65;
+    try { var sv = localStorage.getItem(mode === "ultra" ? "sc.fovu" : "sc.fov"); if (sv && +sv >= 45 && +sv <= 150) want = +sv; } catch (e) {}
+    f.value = String(want); $("fovOut").textContent = Math.round(want) + "°";
+    $("lensDesc").textContent = mode === "ultra" ?
+      "0.5xなどの超広角カメラです。1枚で広く写るので枚数が減ります。周辺のゆがみは、つなぎ合わせる時に自動で補正します。" :
+      "ふつうのカメラです。写真1枚で見える範囲は約65°です。";
+    try { localStorage.setItem("sc.lens", mode); } catch (e) {}
+    rebuild(pattern, true);
+    return true;
+  }
+  document.querySelectorAll("[data-lens]").forEach(function (b) { b.addEventListener("click", function () { if (!busy) setLens(b.getAttribute("data-lens"), false); }); });
   $("fov").addEventListener("input", function () {
     $("fovOut").textContent = this.value + "°";
     if (count() === 0) rebuild(pattern, true);
@@ -899,26 +945,22 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   }
   var PV = 0; // out-of-image marker for sampleHP
   // bilinear sample of the high-pass map; returns NaN when the direction is outside the picture
-  function sampleHP(m, B, F, dx, dy, dz) {   // m: {w,h,hp} level map; F in that map's pixels
-    var z = dx * B.f[0] + dy * B.f[1] + dz * B.f[2];
-    if (z <= 0.05) return NaN;
-    var ix = m.w * 0.5 + F * (dx * B.r[0] + dy * B.r[1] + dz * B.r[2]) / z;
-    var iy = m.h * 0.5 - F * (dx * B.u[0] + dy * B.u[1] + dz * B.u[2]) / z;
+  function sampleHP(m, B, F, a, dx, dy, dz) {   // m: {w,h,hp} level map; F in that map's pixels
+    if (!lensXY(B, F, a, dx, dy, dz)) return NaN;
+    var ix = m.w * 0.5 + LX, iy = m.h * 0.5 + LY;
     if (ix < 3 || iy < 3 || ix >= m.w - 4 || iy >= m.h - 4) return NaN;
     var px = ix | 0, py = iy | 0, fx = ix - px, fy = iy - py, o = py * m.w + px, hp = m.hp;
     return hp[o] * (1 - fx) * (1 - fy) + hp[o + 1] * fx * (1 - fy) + hp[o + m.w] * (1 - fx) * fy + hp[o + m.w + 1] * fx * fy;
   }
-  function sampleRGB(m, B, F, dx, dy, dz, out) {
-    var z = dx * B.f[0] + dy * B.f[1] + dz * B.f[2];
-    if (z <= 0.05) return false;
-    var ix = m.w * 0.5 + F * (dx * B.r[0] + dy * B.r[1] + dz * B.r[2]) / z;
-    var iy = m.h * 0.5 - F * (dx * B.u[0] + dy * B.u[1] + dz * B.u[2]) / z;
+  function sampleRGB(m, B, F, a, dx, dy, dz, out) {
+    if (!lensXY(B, F, a, dx, dy, dz)) return false;
+    var ix = m.w * 0.5 + LX, iy = m.h * 0.5 + LY;
     if (ix < 3 || iy < 3 || ix >= m.w - 4 || iy >= m.h - 4) return false;
     var px = ix | 0, py = iy | 0, fx = ix - px, fy = iy - py, o = (py * m.w + px) * 4, o2 = o + m.w * 4, d = m.rgb;
-    var a = (1 - fx) * (1 - fy), b = fx * (1 - fy), c = (1 - fx) * fy, e = fx * fy;
-    out[0] = d[o] * a + d[o + 4] * b + d[o2] * c + d[o2 + 4] * e;
-    out[1] = d[o + 1] * a + d[o + 5] * b + d[o2 + 1] * c + d[o2 + 5] * e;
-    out[2] = d[o + 2] * a + d[o + 6] * b + d[o2 + 2] * c + d[o2 + 6] * e;
+    var c0 = (1 - fx) * (1 - fy), b0 = fx * (1 - fy), c = (1 - fx) * fy, e = fx * fy;
+    out[0] = d[o] * c0 + d[o + 4] * b0 + d[o2] * c + d[o2 + 4] * e;
+    out[1] = d[o + 1] * c0 + d[o + 5] * b0 + d[o2 + 1] * c + d[o2 + 5] * e;
+    out[2] = d[o + 2] * c0 + d[o + 6] * b0 + d[o2 + 2] * c + d[o2 + 6] * e;
     return true;
   }
 
@@ -926,18 +968,17 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   // parts of neighbouring photos show the same picture. Returns null when there is nothing to align on.
   async function calibrate(sm, nom, fov0, progress, opt) {
     opt = opt || {};
-    var K = sm.length, N = 16000, i, k, s, e;
-    function Fof(k, fov) { return Math.max(sm[k].w, sm[k].h) / 2 / Math.tan(fov / 2); }
+    var K = sm.length, N = 16000, i, k, s, e, lens = opt.a0 || 0, ultra = !!opt.ultra;
+    function Fof(k, fov) { return Math.max(sm[k].w, sm[k].h) / 2 / lensG(fov / 2, lens); }
     // 1) sample directions that at least two photos see
     var dirs = [], cs = [0], ci = [], M = 0, ga = Math.PI * (3 - Math.sqrt(5));
     for (i = 0; i < N; i++) {
       var z = 1 - 2 * (i + 0.5) / N, rr = Math.sqrt(1 - z * z), th = i * ga, dx = rr * Math.sin(th), dy = rr * Math.cos(th);
       var list = [];
       for (k = 0; k < K; k++) {
-        var B = nom[k], zz = dx * B.f[0] + dy * B.f[1] + z * B.f[2];
-        if (zz <= 0.1) continue;
-        var F = Fof(k, fov0);
-        var ix = sm[k].w / 2 + F * (dx * B.r[0] + dy * B.r[1] + z * B.r[2]) / zz, iy = sm[k].h / 2 - F * (dx * B.u[0] + dy * B.u[1] + z * B.u[2]) / zz;
+        var B = nom[k];
+        if (!lensXY(B, Fof(k, fov0), lens, dx, dy, z)) continue;
+        var ix = sm[k].w / 2 + LX, iy = sm[k].h / 2 + LY;
         if (ix > 6 && iy > 6 && ix < sm[k].w - 7 && iy < sm[k].h - 7) list.push(k);
       }
       if (list.length < 2) continue;
@@ -956,7 +997,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     function fillImage(k, F) {
       var B = Bs[k], m = sm[k].lv[lvl], a = LS[k], c = LC[k], t, s2;
       F = F * m.w / sm[k].w;
-      for (t = 0; t < a.length; t++) { s2 = a[t] * 3; cval[c[t]] = sampleHP(m, B, F, sd[s2], sd[s2 + 1], sd[s2 + 2]); }
+      for (t = 0; t < a.length; t++) { s2 = a[t] * 3; cval[c[t]] = sampleHP(m, B, F, lens, sd[s2], sd[s2 + 1], sd[s2 + 2]); }
     }
     function fillAll() { for (var q = 0; q < K; q++) fillImage(q, Fof(q, fov)); }
     function sampleCost(s) {
@@ -1030,7 +1071,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       }
       fov = bestF; fillAll();
     }
-    function fixedFov(v) { return clamp(v, 35 * D2R, 110 * D2R); }
+    function fixedFov(v) { return clamp(v, 35 * D2R, 150 * D2R); }
 
     progress("向きを確認中", 0); await tick();
     // alternate between "which field of view fits" and "where does each photo belong", coarse to fine
@@ -1038,29 +1079,33 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     // candidate view angle the photos are re-aligned, and the angle that leaves the least mismatch wins.
     // This runs from blurry to sharp so that photos several degrees off can still find their place.
     function resetPoses() { for (var q = 0; q < K * 3; q++) del[q] = 0; for (var q2 = 0; q2 < K; q2++) Bs[q2] = nom[q2]; }
-    var stageNo = 0, stageTotal = 6;
+    var stageNo = 0, stageTotal = ultra ? 8 : 6;
     async function profile(cands, steps, it, warm) {
       var best = null, c, i2;
       stageNo++;
       for (i2 = 0; i2 < cands.length; i2++) {
-        fov = fixedFov(cands[i2]);
+        var cd = cands[i2];
+        if (typeof cd === "number") fov = fixedFov(cd); else { fov = fixedFov(cd.f); lens = cd.a; }
         if (!warm) resetPoses();
         else if (best) { del.set(best.del); Bs = best.Bs.slice(); }
         else if (profile.start) { del.set(profile.start.del); Bs = profile.start.Bs.slice(); }
         fillAll();
         await converge(steps, "向きと画角を補正中 (" + stageNo + "/" + stageTotal + ")", it);
         c = dataTotal() + regTotal();
-        if (!best || c < best.c) best = { c: c, f: fov, del: Float64Array.from(del), Bs: Bs.slice() };
+        if (!best || c < best.c) best = { c: c, f: fov, a: lens, del: Float64Array.from(del), Bs: Bs.slice() };
         else if (warm) { /* keep best as the warm start */ }
       }
-      fov = best.f; del.set(best.del); Bs = best.Bs.slice(); fillAll();
+      fov = best.f; lens = best.a; del.set(best.del); Bs = best.Bs.slice(); fillAll();
       profile.start = { del: Float64Array.from(del), Bs: Bs.slice() };
     }
     function around(f, rel, n) { var a2 = [], q; for (q = 0; q < n; q++) a2.push(f * (1 - rel + 2 * rel * q / (n - 1))); return a2; }
     setLevel(0); await profile(around(fov0, 0.18, 11), [8, 4, 2], 4, false);
     setLevel(1); await profile(around(fov, 0.06, 5), [4, 2, 1], 5, true);
+    // ultra-wide: also find how strongly the edges are squeezed (lens shape), together with the field of view
+    if (ultra) await profile([0, 0.25, 0.5, 0.75, 1].map(function (a2) { return { f: fov, a: a2 }; }), [4, 2, 1], 4, true);
     setLevel(2); await profile(around(fov, 0.04, 5), [2, 1, 0.5], 5, true);
     setLevel(3); await profile(around(fov, 0.02, 3), [1, 0.5, 0.25], 6, true);
+    if (ultra) await profile([-0.1, 0, 0.1].map(function (d2) { return { f: fov, a: clamp(lens + d2, 0, 1.2) }; }), [1, 0.5, 0.25], 5, true);
     // a photo that is still clearly worse than the rest (stuck in a wrong spot): search around it more widely
     async function rescue() {
       var cs2 = [], q, order, med, bad = 0;
@@ -1087,8 +1132,8 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     var cost1 = dataTotal();
 
     var rotSum = 0; for (k = 0; k < K; k++) rotSum += Math.hypot(del[k * 3], del[k * 3 + 1], del[k * 3 + 2]);
-    var res = { fov: fov, bases: Bs.slice(), cost0: cost0, cost1: cost1, gain: 1 - cost1 / cost0, rotAvg: rotSum / K, dirs: sd, cstart: cstart, cimg: cimg, M: M, K: K };
-    if (!(cost1 < cost0)) { res.fov = fov0; res.bases = nom.slice(); res.gain = 0; res.rotAvg = 0; }
+    var res = { fov: fov, lens: lens, bases: Bs.slice(), cost0: cost0, cost1: cost1, gain: 1 - cost1 / cost0, rotAvg: rotSum / K, dirs: sd, cstart: cstart, cimg: cimg, M: M, K: K };
+    if (!(cost1 < cost0)) { res.fov = fov0; res.lens = opt.a0 || 0; res.bases = nom.slice(); res.gain = 0; res.rotAvg = 0; }
     return res;
   }
 
@@ -1100,8 +1145,8 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     for (s = 0; s < cal.M; s++) {
       ok.length = 0; ids.length = 0;
       for (e = cal.cstart[s]; e < cal.cstart[s + 1]; e++) {
-        var k = cal.cimg[e], F = Math.max(sm[k].w, sm[k].h) / 2 / Math.tan(cal.fov / 2);
-        if (!sampleRGB(sm[k], cal.bases[k], F, cal.dirs[s * 3], cal.dirs[s * 3 + 1], cal.dirs[s * 3 + 2], tmp)) continue;
+        var k = cal.cimg[e], F = Math.max(sm[k].w, sm[k].h) / 2 / lensG(cal.fov / 2, cal.lens);
+        if (!sampleRGB(sm[k], cal.bases[k], F, cal.lens, cal.dirs[s * 3], cal.dirs[s * 3 + 1], cal.dirs[s * 3 + 2], tmp)) continue;
         var lum = 0.299 * tmp[0] + 0.587 * tmp[1] + 0.114 * tmp[2];
         if (lum > 245 || lum < 8) continue;
         ok.push([tmp[0], tmp[1], tmp[2]]); ids.push(k);
@@ -1159,24 +1204,25 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     if (idx.length < 2 || busy) return;
     busy = true; renderCapture(); $("report").hidden = true;
     var W = Math.min(+$("res").value, Math.max(2048, maxTex)), H = W / 2;
-    var K = idx.length, fov0 = +$("fov").value * D2R, noteParts = [], fovUsed = fov0;
+    var K = idx.length, fov0 = +$("fov").value * D2R, noteParts = [], fovUsed = fov0, lensUsed = lensA(), ultraMode = lensMode() === "ultra";
     var nom = idx.map(function (si) { return shots[si].basis || basis(targets[si].yaw * D2R, targets[si].pitch * D2R); });
     var bases = nom, gains = null, cal = null;
 
     if ($("autoFix").checked) {
       showProgress("写真を解析中…", 0); await tick();
       var sm = idx.map(function (si) { return makeSmall(shots[si].canvas); });
-      cal = await calibrate(sm, nom, fov0, function (t, f) { showProgress(t, f); });
+      cal = await calibrate(sm, nom, fov0, function (t, f) { showProgress(t, f); }, { a0: lensUsed, ultra: ultraMode });
       if (cal && cal.flat) { noteParts.push("模様の少ない場面のため、向きの補正はしていません。"); cal = null; }
       else if (!cal) noteParts.push("写真どうしの重なりが少ないため、向きの補正はできませんでした。撮影位置を増やすと改善します。");
       else {
-        bases = cal.bases; fovUsed = cal.fov;
+        bases = cal.bases; fovUsed = cal.fov; lensUsed = cal.lens;
         showProgress("明るさを揃えています…", 0.98); await tick();
         gains = solveGains(sm, cal);
         if (cal.gain > 0.02) noteParts.push("レンズの画角を" + Math.round(fov0 / D2R) + "°→" + (fovUsed / D2R).toFixed(1) + "°に、写真" + K + "枚の向きを平均" + cal.rotAvg.toFixed(1) + "°補正し、つなぎ目のずれを" + Math.round(cal.gain * 100) + "%減らしました。");
         else noteParts.push("向きの補正で改善できなかったため、撮影時の向きのまま合成しました。");
+        if (ultraMode && cal.gain > 0.02) noteParts.push("超広角レンズの周辺のゆがみも補正しました(ゆがみの強さ " + Math.round(lensUsed * 100) + "%)。");
         noteParts.push("写真ごとの明るさと色味も揃えました。");
-        if (cal.gain > 0.3) { try { localStorage.setItem("sc.fov", String(Math.round(fovUsed / D2R * 10) / 10)); } catch (e) {} }
+        if (cal.gain > 0.3) { try { localStorage.setItem(ultraMode ? "sc.fovu" : "sc.fov", String(Math.round(fovUsed / D2R * 10) / 10)); if (ultraMode) { localStorage.setItem("sc.lensa", String(Math.round(lensUsed * 100) / 100)); curLensA = lensUsed; } } catch (e) {} }
       }
     } else noteParts.push("自動補正はオフです(撮影時の向きのまま合成)。");
 
@@ -1188,9 +1234,9 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     idx.forEach(function (si, k) {
       var cv = shots[si].canvas, w = cv.width, h = cv.height, b = bases[k];
       DATA.push(cv.getContext("2d").getImageData(0, 0, w, h).data);
-      var f = (Math.max(w, h) / 2) / Math.tan(fovUsed / 2);
+      var f = (Math.max(w, h) / 2) / lensG(fovUsed / 2, lensUsed);
       CW[k] = w; CH[k] = h; CF[k] = f;
-      CL[k] = Math.cos(Math.min(Math.atan(Math.hypot(w, h) / 2 / f), 1.5));
+      CL[k] = Math.cos(Math.min(lensInvG(Math.hypot(w, h) / 2 / f, lensUsed), 1.5)) - 0.01;
       FX[k] = b.f[0]; FY[k] = b.f[1]; FZ[k] = b.f[2];
       RX[k] = b.r[0]; RY[k] = b.r[1]; RZ[k] = b.r[2];
       UX[k] = b.u[0]; UY[k] = b.u[1]; UZ[k] = b.u[2];
@@ -1211,8 +1257,16 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
           var z = dx * FX[k] + dy * FY[k] + dz * FZ[k];
           if (z < CL[k]) continue;
           var w = CW[k], h = CH[k];
-          var ix = w * 0.5 + CF[k] * (dx * RX[k] + dy * RY[k] + dz * RZ[k]) / z;
-          var iy = h * 0.5 - CF[k] * (dx * UX[k] + dy * UY[k] + dz * UZ[k]) / z;
+          var ix, iy;
+          if (lensUsed === 0) {
+            ix = w * 0.5 + CF[k] * (dx * RX[k] + dy * RY[k] + dz * RZ[k]) / z;
+            iy = h * 0.5 - CF[k] * (dx * UX[k] + dy * UY[k] + dz * UZ[k]) / z;
+          } else {
+            var ccx = dx * RX[k] + dy * RY[k] + dz * RZ[k], ccy = dx * UX[k] + dy * UY[k] + dz * UZ[k];
+            var rho = Math.sqrt(ccx * ccx + ccy * ccy), tha = Math.atan2(rho, z);
+            var kk = rho > 1e-9 ? CF[k] * ((1 - lensUsed) * Math.tan(tha) + lensUsed * tha) / rho : 0;
+            ix = w * 0.5 + ccx * kk; iy = h * 0.5 - ccy * kk;
+          }
           if (ix < 0 || iy < 0 || ix >= w - 1 || iy >= h - 1) continue;
           var q = Math.min(Math.min(ix, w - 1 - ix) / (w * 0.5), Math.min(iy, h - 1 - iy) / (h * 0.5)) * 2.2;
           if (q > 1) q = 1;
@@ -1267,9 +1321,9 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     $("reportTxt").textContent = noteParts.join(" ");
     $("report").hidden = false;
     if (cal && cal.gain > 0.3) {
-      $("fov").value = String(clamp(Math.round(fovUsed / D2R), 45, 100)); $("fovOut").textContent = $("fov").value + "°";
+      $("fov").value = String(clamp(Math.round(fovUsed / D2R), 45, 150)); $("fovOut").textContent = $("fov").value + "°";
     }
-    window.__last = { canvas: oc, cal: cal && cal.fov ? { fov: cal.fov / D2R, gain: cal.gain, rotAvg: cal.rotAvg, cost0: cal.cost0, cost1: cal.cost1 } : null, cover: cover, gains: gains };
+    window.__last = { canvas: oc, cal: cal && cal.fov ? { fov: cal.fov / D2R, lens: cal.lens, gain: cal.gain, rotAvg: cal.rotAvg, cost0: cal.cost0, cost1: cal.cost1 } : null, cover: cover, gains: gains };
     say("つなぎ合わせました。上のビューアでぐるっと見回せます。よければ「JPEGで保存」を押してください。", false);
     stage.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
@@ -1331,6 +1385,43 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   }
   function setHint(t) { if (t !== L.hint) { L.hint = t; $("liveHint").textContent = t; } }
 
+  L.devs = []; L.devId = "";
+  async function openStream(devId) {
+    var video = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+    if (devId) video.deviceId = { exact: devId }; else video.facingMode = { ideal: "environment" };
+    var st = await navigator.mediaDevices.getUserMedia({ video: video, audio: false });
+    if (L.stream) L.stream.getTracks().forEach(function (t) { t.stop(); });
+    L.stream = st; lv.srcObject = st;
+    try { await lv.play(); } catch (e) {}
+    var tr = st.getVideoTracks()[0], set = tr && tr.getSettings ? tr.getSettings() : {};
+    L.devId = set.deviceId || devId || "";
+    if (lv.videoWidth) setAspect(lv.videoWidth, lv.videoHeight);
+  }
+  async function listCameras() {
+    L.devs = [];
+    try {
+      var all = await navigator.mediaDevices.enumerateDevices();
+      L.devs = all.filter(function (d) { return d.kind === "videoinput" && !/front|user|facetime|フロント|前面/i.test(d.label); });
+    } catch (e) {}
+  }
+  function camName(d, i) {
+    var l = d.label || "";
+    if (/ultra|超広角/i.test(l)) return "超広角カメラ";
+    if (/tele|望遠/i.test(l)) return "望遠カメラ";
+    return l ? l.replace(/\s*\(.*\)$/, "") : "カメラ " + (i + 1);
+  }
+  function updateCamButton() {
+    var b = $("liveCam");
+    if (L.devs.length < 2) { b.hidden = true; return; }
+    var i = Math.max(0, L.devs.findIndex(function (d) { return d.deviceId === L.devId; }));
+    b.hidden = false; b.textContent = "使用中: " + camName(L.devs[i], i) + "(タップで切替)";
+  }
+  $("liveCam").addEventListener("click", async function () {
+    if (!L.on || L.devs.length < 2) return;
+    var i = Math.max(0, L.devs.findIndex(function (d) { return d.deviceId === L.devId; }));
+    try { await openStream(L.devs[(i + 1) % L.devs.length].deviceId); await listCameras(); } catch (e) { say("カメラを切り替えられませんでした。", true); }
+    updateCamButton();
+  });
   async function startLive() {
     if (busy) return;
     try {
@@ -1340,12 +1431,15 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       }
     } catch (e) { say("モーションセンサーの許可が必要です。表示された確認で「許可」を選んでから、もう一度押してください。", true); return; }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { say("このブラウザではカメラを使えません。下の「この位置を1枚撮る」で1枚ずつ撮影してください。", true); return; }
-    try {
-      L.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
-    } catch (e) { say("カメラを使えませんでした。ブラウザのカメラ許可(アドレスバーの鍵マーク)を確認してください。", true); return; }
-    lv.srcObject = L.stream;
-    try { await lv.play(); } catch (e) {}
-    if (lv.videoWidth) setAspect(lv.videoWidth, lv.videoHeight);
+    try { await openStream(null); }
+    catch (e) { say("カメラを使えませんでした。ブラウザのカメラ許可(アドレスバーの鍵マーク)を確認してください。", true); return; }
+    // ultra-wide: pick the ultra-wide back camera when the browser names it; otherwise the button lets the user cycle
+    await listCameras();
+    if (lensMode() === "ultra" && L.devs.length) {
+      var uw = L.devs.findIndex(function (d) { return /ultra|超広角|0\.5/i.test(d.label); });
+      if (uw >= 0 && L.devs[uw].deviceId !== L.devId) { try { await openStream(L.devs[uw].deviceId); } catch (e) {} }
+    }
+    updateCamButton();
     L.have = false; L.hold = 0; L.lastF = null; L.lastT = 0; L.on = true; L.hist = []; L.hint = "";
     window.addEventListener("deviceorientation", onOri);
     $("live").hidden = false;
@@ -1425,13 +1519,13 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     if (lc.width !== W || lc.height !== H) { lc.width = W; lc.height = H; }
     lctx.clearRect(0, 0, W, H);
     var vw = lv.videoWidth || W, vh = lv.videoHeight || H, sc = Math.max(W / vw, H / vh);
-    var half = Math.max(vw, vh) * sc / 2, F = half / Math.tan(+$("fov").value * D2R / 2);
+    var half = Math.max(vw, vh) * sc / 2, LA = lensA(), F = half / lensG(+$("fov").value * D2R / 2, LA);
     var cx = W / 2, cy = H / 2, u = dpr;
     lctx.lineWidth = 2 * u;
     targets.forEach(function (tg, i) {
-      var d = dirOf(tg.yaw * D2R, tg.pitch * D2R), zc = vdot(d, f);
-      if (zc < 0.05) return;
-      var x = cx + F * vdot(d, b.r) / zc, y = cy - F * vdot(d, b.u) / zc;
+      var d = dirOf(tg.yaw * D2R, tg.pitch * D2R);
+      if (!lensXY(b, F, LA, d[0], d[1], d[2])) return;
+      var x = cx + LX, y = cy + LY;
       if (x < -30 || y < -30 || x > W + 30 || y > H + 30) return;
       lctx.beginPath(); lctx.arc(x, y, (i === active ? 11 : 8) * u, 0, 7);
       if (shots[i]) { lctx.fillStyle = "rgba(108,195,224,.85)"; lctx.fill(); }
@@ -1480,7 +1574,8 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
 
 
   /* ---------- boot ---------- */
-  try { var sf = localStorage.getItem("sc.fov"); if (sf && +sf >= 45 && +sf <= 100) { $("fov").value = sf; $("fovOut").textContent = Math.round(+sf) + "°"; } } catch (e) {}
+  try { var la = localStorage.getItem("sc.lensa"); if (la && +la >= 0 && +la <= 1.2) curLensA = +la; if (localStorage.getItem("sc.lens") === "ultra") setLens("ultra", true); } catch (e) {}
+  try { var sf = lensMode() === "ultra" ? null : localStorage.getItem("sc.fov"); if (sf && +sf >= 45 && +sf <= 150) { $("fov").value = sf; $("fovOut").textContent = Math.round(+sf) + "°"; } } catch (e) {}
   rebuild("ring", true);
   usePano(drawSample(), "サンプル");
   resize();
@@ -1488,7 +1583,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     window.__sphere = {
       targets: function () { return targets; }, frameAspect: function () { return frameAspect; },
       setShots: function (list) { shots = targets.map(function (t, i) { return list[i] ? shotFromCanvas(list[i].canvas, list[i].basis || null) : null; }); renderCapture(); },
-      rebuild: rebuild, setAspect: setAspect, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, stitch: stitch, last: function () { return window.__last; }
+      rebuild: rebuild, setAspect: setAspect, setLens: setLens, calibrate: calibrate, makeSmall: makeSmall, basis: basis, shots: function () { return shots; }, lensG: lensG, stitch: stitch, last: function () { return window.__last; }
     };
   }
 })();
