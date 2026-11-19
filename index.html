@@ -961,7 +961,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     return { f: f2, r: rodrigues(r1, f2, r * D2R), u: rodrigues(u2, f2, r * D2R) };
   }
 
-  var SM = 288; // working size (long side) used for alignment analysis
+  var SM = 640; // working size (long side) used for alignment analysis
   function boxBlur(src, w, h, rad) {
     var tmp = new Float32Array(w * h), out = new Float32Array(w * h), x, y, i, s, n = 2 * rad + 1;
     for (y = 0; y < h; y++) {
@@ -995,7 +995,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     var c = document.createElement("canvas"); c.width = w; c.height = h;
     var g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(cv, 0, 0, w, h);
     var d = g.getImageData(0, 0, w, h).data, lv = [];
-    [[40, 2], [72, 3], [144, 4], [SM, 5]].forEach(function (cfg) {
+    [[40, 2], [72, 3], [144, 4], [288, 5], [SM, 7]].forEach(function (cfg) {
       if (cfg[0] === SM) { lv.push({ w: w, h: h, hp: hpMap(d, w, h, cfg[1]) }); return; }
       var kk = cfg[0] / Math.max(w, h), lw = Math.max(12, Math.round(w * kk)), lh = Math.max(12, Math.round(h * kk));
       var c2 = document.createElement("canvas"); c2.width = lw; c2.height = lh;
@@ -1029,7 +1029,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
   // parts of neighbouring photos show the same picture. Returns null when there is nothing to align on.
   async function calibrate(sm, nom, fov0, progress, opt) {
     opt = opt || {};
-    var K = sm.length, N = 16000, i, k, s, e, lens = opt.a0 || 0, ultra = !!opt.ultra;
+    var K = sm.length, N = 24000, i, k, s, e, lens = opt.a0 || 0, ultra = !!opt.ultra;
     function Fof(k, fov) { return Math.max(sm[k].w, sm[k].h) / 2 / lensG(fov / 2, lens); }
     // 1) sample directions that at least two photos see
     var dirs = [], cs = [0], ci = [], M = 0, ga = Math.PI * (3 - Math.sqrt(5));
@@ -1080,7 +1080,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       sigma2 = nq ? sq / nq : 0; PEN = 1.2 * sigma2;
       return nq;
     }
-    var LAST = sm[0].lv.length - 1;
+    var LAST = 3;
     if (setLevel(LAST) < 200) return null;
     if (Math.sqrt(sigma2) < 0.02) return { flat: true };   // no texture to align on (blank wall, sky...)
     var cost0 = dataTotal();
@@ -1134,6 +1134,88 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     }
     function fixedFov(v) { return clamp(v, 35 * D2R, 150 * D2R); }
 
+
+    // Gauss-Newton / Levenberg-Marquardt on (view angle, every photo's rotation) at once. Unlike the step-by-step
+    // search this follows the coupling between photos and view angle, so it does not get stuck near-but-wrong.
+    var dvF = new Float32Array(cval.length), dvP = new Float32Array(cval.length * 3);
+    function solveLin(A, b, n) {
+      var i, j, k2, M2 = [], x = new Float64Array(n);
+      for (i = 0; i < n; i++) { var rw = new Float64Array(n + 1); rw.set(A[i]); rw[n] = b[i]; M2.push(rw); }
+      for (i = 0; i < n; i++) {
+        var pv = i; for (j = i + 1; j < n; j++) if (Math.abs(M2[j][i]) > Math.abs(M2[pv][i])) pv = j;
+        var tt = M2[i]; M2[i] = M2[pv]; M2[pv] = tt;
+        var dd = M2[i][i]; if (Math.abs(dd) < 1e-14) return null;
+        for (j = i + 1; j < n; j++) { var f = M2[j][i] / dd; if (!f) continue; for (k2 = i; k2 <= n; k2++) M2[j][k2] -= f * M2[i][k2]; }
+      }
+      for (i = n - 1; i >= 0; i--) { var sm3 = M2[i][n]; for (j = i + 1; j < n; j++) sm3 -= M2[i][j] * x[j]; x[i] = sm3 / M2[i][i]; }
+      return x;
+    }
+    async function gn(maxIter, freeFov) {
+      var P = 3 * K + 1, mu = 1e-2, it, q, j, e, s2, cur = dataTotal() + regTotal(), HF = 0.12, HP = 0.1;
+      for (it = 0; it < maxIter; it++) {
+        var base = Float32Array.from(cval), fov0g = fov, dp;
+        // derivatives of every sample value by finite differences
+        fov = fov0g + HF * D2R; fillAll();
+        for (e = 0; e < cval.length; e++) dvF[e] = (cval[e] - base[e]) / HF;
+        fov = fov0g; fillAll();
+        for (q = 0; q < K; q++) {
+          var d0 = [del[q * 3], del[q * 3 + 1], del[q * 3 + 2]], ce = LC[q], t;
+          for (j = 0; j < 3; j++) {
+            var d1 = d0.slice(); d1[j] += HP; setPose(q, d1[0], d1[1], d1[2]);
+            for (t = 0; t < ce.length; t++) dvP[ce[t] * 3 + j] = (cval[ce[t]] - base[ce[t]]) / HP;
+          }
+          setPose(q, d0[0], d0[1], d0[2]);
+        }
+        var A = [], bb = new Float64Array(P), ia = [0, 0, 0, 0], va = [0, 0, 0, 0], idxs = [], vals = [];
+        for (q = 0; q < P; q++) A.push(new Float64Array(P));
+        for (s2 = 0; s2 < M; s2++) {
+          var n = 0, sum = 0, ok = true, e0 = cstart[s2], e1 = cstart[s2 + 1];
+          for (e = e0; e < e1; e++) {
+            var bv = base[e];
+            if (bv !== bv) continue;
+            if (dvF[e] !== dvF[e] || dvP[e * 3] !== dvP[e * 3] || dvP[e * 3 + 1] !== dvP[e * 3 + 1] || dvP[e * 3 + 2] !== dvP[e * 3 + 2]) { ok = false; break; }
+            n++; sum += bv;
+          }
+          if (!ok || n < 2) continue;
+          var mean = sum / n; idxs.length = 0; vals.length = 0; var rs = [];
+          for (e = e0; e < e1; e++) {
+            if (base[e] !== base[e]) continue;
+            var kk = cimg[e] * 3 + 1;
+            idxs.push([0, kk, kk + 1, kk + 2]); vals.push([freeFov ? dvF[e] : 0, dvP[e * 3], dvP[e * 3 + 1], dvP[e * 3 + 2]]); rs.push(base[e] - mean);
+          }
+          for (var a = 0; a < n; a++) {
+            for (j = 0; j < 4; j++) bb[idxs[a][j]] += rs[a] * vals[a][j];
+            for (var b2 = 0; b2 < n; b2++) {
+              var cf = (a === b2 ? 1 : 0) - 1 / n, ixa = idxs[a], ixb = idxs[b2], vaa = vals[a], vbb = vals[b2];
+              for (var u = 0; u < 4; u++) { var row = A[ixa[u]], cu = cf * vaa[u]; if (cu === 0) continue; for (var w2 = 0; w2 < 4; w2++) row[ixb[w2]] += cu * vbb[w2]; }
+            }
+          }
+        }
+        for (q = 0; q < K; q++) { var ck = 0.03 * LS[q].length * sigma2 / 100; for (j = 0; j < 3; j++) { A[1 + q * 3 + j][1 + q * 3 + j] += ck; bb[1 + q * 3 + j] += ck * del[q * 3 + j]; } }
+        if (!freeFov) A[0][0] += 1;
+        var saveDel = Float64Array.from(del), saveFov = fov, improved = false, tries;
+        for (tries = 0; tries < 7; tries++) {
+          var Am = A.map(function (r, i2) { var c2 = Float64Array.from(r); c2[i2] += mu * (r[i2] + 1e-9); return c2; });
+          var rhs = Float64Array.from(bb, function (x) { return -x; }), sol = solveLin(Am, rhs, P);
+          if (!sol) { mu *= 10; continue; }
+          var ok2 = true;
+          for (q = 0; q < K; q++) {
+            for (j = 0; j < 3; j++) { var nv = saveDel[q * 3 + j] + sol[1 + q * 3 + j]; if (Math.abs(nv) > 15) nv = clamp(nv, -15, 15); del[q * 3 + j] = nv; }
+          }
+          fov = freeFov ? clamp(saveFov + sol[0] * D2R, 35 * D2R, 150 * D2R) : saveFov;
+          for (q = 0; q < K; q++) Bs[q] = tweak(nom[q], del[q * 3], del[q * 3 + 1], del[q * 3 + 2]);
+          fillAll();
+          var nc = dataTotal() + regTotal();
+          if (nc < cur - 1e-12) { var rel = (cur - nc) / cur; cur = nc; improved = true; mu = Math.max(mu / 4, 1e-5); if (rel < 2e-3) it = maxIter; break; }
+          mu *= 5; del.set(saveDel); fov = saveFov; for (q = 0; q < K; q++) Bs[q] = tweak(nom[q], del[q * 3], del[q * 3 + 1], del[q * 3 + 2]);
+          fillAll();
+        }
+        if (!improved) break;
+        if (it % 3 === 2) { await tick(); }
+      }
+      return cur;
+    }
+
     progress("向きを確認中", 0); await tick();
     // alternate between "which field of view fits" and "where does each photo belong", coarse to fine
     // Poses and field of view are tangled: a wrong view angle makes every photo look misplaced. So for each
@@ -1160,12 +1242,39 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       profile.start = { del: Float64Array.from(del), Bs: Bs.slice() };
     }
     function around(f, rel, n) { var a2 = [], q; for (q = 0; q < n; q++) a2.push(f * (1 - rel + 2 * rel * q / (n - 1))); return a2; }
-    setLevel(0); await profile(around(fov0, 0.18, 11), [8, 4, 2], 4, false);
-    setLevel(1); await profile(around(fov, 0.06, 5), [4, 2, 1], 5, true);
-    // ultra-wide: also find how strongly the edges are squeezed (lens shape), together with the field of view
-    if (ultra) await profile([0, 0.25, 0.5, 0.75, 1].map(function (a2) { return { f: fov, a: a2 }; }), [4, 2, 1], 4, true);
-    setLevel(2); await profile(around(fov, 0.04, 5), [2, 1, 0.5], 5, true);
-    setLevel(3); await profile(around(fov, 0.02, 3), [1, 0.5, 0.25], 6, true);
+    function resetPoses2() { resetPoses(); }
+    // 1) many starting view angles, each solved jointly at the blurriest level. The best few are carried all the way
+    //    to the sharp level and the one that leaves the least mismatch wins (so one unlucky start cannot trap the result).
+    setLevel(0); stageNo = 1;
+    var starts = around(fov0, 0.2, 13), si2, cands = [];
+    for (si2 = 0; si2 < starts.length; si2++) {
+      fov = fixedFov(starts[si2]); resetPoses(); fillAll();
+      progress("向きと画角を補正中 (1/" + stageTotal + ")", si2 / starts.length * 0.5); await tick();
+      var rc = await gn(14, true);
+      cands.push({ c: rc, f: fov, a: lens, del: Float64Array.from(del), Bs: Bs.slice() });
+    }
+    cands.sort(function (x, y) { return x.c - y.c; });
+    var nKeep = ultra ? 2 : 13, fin = null, ci2;
+    for (ci2 = 0; ci2 < Math.min(nKeep, cands.length); ci2++) {
+      var cd2 = cands[ci2];
+      fov = cd2.f; lens = cd2.a; del.set(cd2.del); Bs = cd2.Bs.slice();
+      progress("向きと画角を補正中 (2/" + stageTotal + ")", 0.5 + 0.4 * ci2 / nKeep); await tick();
+      setLevel(1); fillAll(); await gn(12, true);
+      if (ultra) {
+        var lb = null, la2, lcand = [0, 0.25, 0.5, 0.75, 1], sv3 = { del: Float64Array.from(del), Bs: Bs.slice(), f: fov };
+        for (la2 = 0; la2 < lcand.length; la2++) {
+          lens = lcand[la2]; del.set(sv3.del); Bs = sv3.Bs.slice(); fov = sv3.f; fillAll();
+          var lc2 = await gn(10, true);
+          if (!lb || lc2 < lb.c) lb = { c: lc2, a: lens, f: fov, del: Float64Array.from(del), Bs: Bs.slice() };
+        }
+        lens = lb.a; fov = lb.f; del.set(lb.del); Bs = lb.Bs.slice(); fillAll();
+      }
+      setLevel(2); await gn(12, true);
+      setLevel(3); var fc = await gn(12, true);
+      if (!fin || fc < fin.c) fin = { c: fc, f: fov, a: lens, del: Float64Array.from(del), Bs: Bs.slice() };
+    }
+    fov = fin.f; lens = fin.a; del.set(fin.del); Bs = fin.Bs.slice(); fillAll();
+    stageNo = 4;
     if (ultra) await profile([-0.1, 0, 0.1].map(function (d2) { return { f: fov, a: clamp(lens + d2, 0, 1.2) }; }), [1, 0.5, 0.25], 5, true);
     // a photo that is still clearly worse than the rest (stuck in a wrong spot): search around it more widely
     async function rescue() {
@@ -1188,9 +1297,12 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       return bad;
     }
     if (await rescue()) { await converge([2, 1, 0.5], "向きと画角を補正中 (6/6)", 4); setLevel(3); await converge([0.5, 0.25, 0.12], "向きと画角を補正中 (6/6)", 5); }
-    await profile(around(fov, 0.01, 3), [0.5, 0.25, 0.12], 8, true);
-    await converge([0.25, 0.12], "向きと画角を補正中 (6/6)", 6);
-    var cost1 = dataTotal();
+    stageNo = 5; progress("向きと画角を補正中 (5/" + stageTotal + ")", 0.85); await tick();
+    setLevel(3); await gn(10, true);
+    // last polish on the sharpest map: sub-pixel placement of every photo
+    setLevel(4); await gn(10, true);
+    await converge([0.15, 0.07, 0.035], "向きと画角を補正中 (6/6)", 4);
+    setLevel(LAST); var cost1 = dataTotal();
 
     var rotSum = 0; for (k = 0; k < K; k++) rotSum += Math.hypot(del[k * 3], del[k * 3 + 1], del[k * 3 + 2]);
     var res = { fov: fov, lens: lens, bases: Bs.slice(), cost0: cost0, cost1: cost1, gain: 1 - cost1 / cost0, rotAvg: rotSum / K, dirs: sd, cstart: cstart, cimg: cimg, M: M, K: K };
@@ -1478,7 +1590,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     if (cal && cal.gain > 0.3) {
       $("fov").value = String(clamp(Math.round(fovUsed / D2R), 45, 150)); $("fovOut").textContent = $("fov").value + "°";
     }
-    window.__last = { canvas: oc, cal: cal && cal.fov ? { fov: cal.fov / D2R, lens: cal.lens, gain: cal.gain, rotAvg: cal.rotAvg, cost0: cal.cost0, cost1: cal.cost1 } : null, cover: cover, gains: gains };
+    window.__last = { canvas: oc, cal: cal && cal.fov ? { fov: cal.fov / D2R, lens: cal.lens, gain: cal.gain, rotAvg: cal.rotAvg, cost0: cal.cost0, cost1: cal.cost1 } : null, cover: cover, gains: gains, bases: bases };
     say(isUW ? "超広角風の写真ができました。サイズはふつうの写真と同じです。よければ「JPEGで保存」を押してください。" : isWide ? "広角パノラマができました。上のビューアで確認できます。よければ「JPEGで保存」を押すと、横長の写真として保存できます。" : "つなぎ合わせました。上のビューアでぐるっと見回せます。よければ「JPEGで保存」を押してください。", false);
     stage.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
