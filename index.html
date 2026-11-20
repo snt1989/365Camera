@@ -82,6 +82,10 @@ button:focus-visible, select:focus-visible, input[type=range]:focus-visible, .do
 button:disabled { opacity: .45; cursor: not-allowed; }
 button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
 button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.sharebox { margin: 10px 14px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); font-size: 13px; }
+.sharebox p { margin: 0 0 10px; }
+.sharerow { display: flex; gap: 8px; }
+.sharerow input { flex: 1; min-width: 0; font: 13px var(--font); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
 .modes { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
 .modes button { text-align: left; padding: 10px 12px; min-height: 76px; border-radius: 10px; display: grid; align-content: start; gap: 3px; line-height: 1.35; background: var(--panel2); }
 .modes button b { font-size: 14px; font-weight: 700; color: var(--fg); }
@@ -208,7 +212,13 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
         <button type="button" id="btnReset">向きをリセット</button>
         <span class="spacer"></span>
         <button type="button" id="btnOpen">360°画像を開く</button>
+        <button type="button" id="btnShare" hidden disabled>共有リンクを作る</button>
         <button type="button" id="btnSave" class="primary" hidden disabled>JPEGで保存</button>
+      </div>
+      <div class="sharebox" id="shareBox" hidden>
+        <p id="shareAsk">公開すると、<b>リンクを知っている人なら誰でも</b>この写真を見られます。写っている人や場所に気をつけてください。</p>
+        <div class="sharerow" id="shareBtns"><button type="button" id="shareGo" class="primary">公開してリンクを作る</button><button type="button" id="shareNo">やめる</button></div>
+        <div class="sharerow" id="shareDone" hidden><input id="shareUrl" readonly aria-label="共有リンク"><button type="button" id="shareCopy" class="primary">コピー</button></div>
       </div>
       <p class="msg" id="msg" role="status" aria-live="polite">いまはサンプル画像を表示しています。ドラッグで見回し、ホイールやピンチで拡大縮小できます。右の「撮影して全天球にする」から、自分の写真を作れます。</p>
     </section>
@@ -555,6 +565,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     uploadTexture(canvas);
     $("srcChip").textContent = label;
     $("btnSave").disabled = !dlApi || label === "サンプル";
+    $("btnShare").disabled = label === "サンプル"; $("shareBox").hidden = true;
     requestDraw();
   }
 
@@ -646,6 +657,46 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
       }
     }, "image/jpeg", 0.92);
   });
+  /* ---------- public share link ---------- */
+  function shareBlob() {
+    var isW = (panoLabel === "広角パノラマ" || panoLabel === "超広角風写真") && wideSave, src = isW ? wideSave : pano;
+    return new Promise(function (resolve, reject) {
+      var scale = 1, tries = [[1, 0.88], [1, 0.78], [0.8, 0.8], [0.65, 0.78], [0.5, 0.75], [0.35, 0.7]], i = 0;
+      (function next() {
+        if (i >= tries.length) return reject(new Error("size"));
+        var t = tries[i++], c = document.createElement("canvas"), mw = Math.min(src.width, 8192);
+        scale = Math.min(1, mw / src.width) * t[0];
+        c.width = Math.max(2, Math.round(src.width * scale)); c.height = Math.max(2, Math.round(src.height * scale));
+        c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { if (!b) return reject(new Error("blob")); if (b.size <= 4.2 * 1024 * 1024) resolve({ blob: b, is360: !isW }); else next(); }, "image/jpeg", t[1]);
+      })();
+    });
+  }
+  $("btnShare").addEventListener("click", function () {
+    $("shareBox").hidden = false; $("shareBtns").hidden = false; $("shareDone").hidden = true;
+    $("shareAsk").innerHTML = "公開すると、<b>リンクを知っている人なら誰でも</b>この写真を見られます。写っている人や場所に気をつけてください。";
+  });
+  $("shareNo").addEventListener("click", function () { $("shareBox").hidden = true; });
+  $("shareGo").addEventListener("click", async function () {
+    var go = $("shareGo"); go.disabled = true; go.textContent = "アップロード中…";
+    try {
+      var r = await shareBlob();
+      var res = await fetch("/api/share", { method: "POST", headers: { "Content-Type": "image/jpeg", "X-Kind": r.is360 ? "360" : "photo" }, body: r.blob });
+      if (!res.ok) throw new Error("http " + res.status);
+      var j = await res.json();
+      $("shareUrl").value = j.view; $("shareBtns").hidden = true; $("shareDone").hidden = false;
+      $("shareAsk").textContent = "公開しました。このリンクを送ると、誰でも見られます。";
+      try { if (navigator.share) navigator.share({ title: "365Camera", url: j.view }).catch(function () {}); } catch (e) {}
+    } catch (e) {
+      $("shareAsk").textContent = "公開できませんでした。通信を確認して、もう一度お試しください。";
+    }
+    go.disabled = false; go.textContent = "公開してリンクを作る";
+  });
+  $("shareCopy").addEventListener("click", async function () {
+    var inp = $("shareUrl");
+    try { await navigator.clipboard.writeText(inp.value); } catch (e) { inp.select(); document.execCommand("copy"); }
+    $("shareCopy").textContent = "コピーしました"; setTimeout(function () { $("shareCopy").textContent = "コピー"; }, 1800);
+  });
   dlApi = {
     save: async function (o) {
       var file = new File([o.data], o.filename, { type: "image/jpeg" });
@@ -659,6 +710,7 @@ button.big { min-height: 52px; font-size: 15px; width: 100%; }
     }
   };
   $("btnSave").hidden = false; $("btnSave").disabled = !pano || panoLabel === "サンプル";
+  $("btnShare").hidden = false; $("btnShare").disabled = $("btnSave").disabled;
 
   /* ---------- sample panorama ---------- */
   function drawSample() {
